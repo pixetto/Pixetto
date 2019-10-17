@@ -1,0 +1,22 @@
+Arduino libraries for vts8654x
+
+Copyright (C) 2018  VIA Technologies, Inc. All rights reserved.
+
+Changelog
+
+2019-03-12  Release v1.2.2 (supported version v1.7.1)
+ * AutoCar API refactoring
+ * Remove useless variables
+
+2019-03-12  Release v1.2.1 (supported version v1.7.1)
+ * Fix note detection doesn't work
+
+2019-03-08  Release v1.2.0 
+ * Add enable/disable feature of driveless car
+ * Config motor and servo API refactoring
+
+2019-02-26  Release v1.1 (supported version v1.7.0)
+ * Add arduino LED control function
+
+2019-01-17  Release v1.0
+ * Works on Firmware version v1.6.20 ~ v1.7.0
