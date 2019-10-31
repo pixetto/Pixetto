@@ -37,12 +37,12 @@ void forward()
 		nPosW = ss.getW();
 
 		nPosCenter = nPosX + nPosW/2;
-		if (nPosCenter > 320 + 80)
+		if (nPosCenter > 500 + 125)
 		{
 		    car.turnRight(30);
 		    Serial.println("Right");
 		}
-		else if (nPosCenter < 320 - 80)
+		else if (nPosCenter < 500 - 125)
 		{
 		    car.turnLeft(30);
 		    Serial.println("Left");
@@ -50,7 +50,7 @@ void forward()
   		else
   		    car.goStraight();
 
-		if (nPosW > 200)
+		if (nPosW > 350)
 		{
 		    car.drive(0);
 		}

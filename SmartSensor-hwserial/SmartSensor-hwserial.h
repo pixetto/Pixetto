@@ -16,7 +16,7 @@
 #define SmartSensor_hwserial_h
 #include <SoftwareSerial.h>
 
-#define DINO_VERSION 1.0.1
+#define DINO_VERSION 1.0.2
 
 class SmartSensor
 {

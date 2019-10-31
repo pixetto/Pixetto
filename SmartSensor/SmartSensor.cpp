@@ -181,10 +181,10 @@ bool SmartSensor::isDetected()
 		if (m_id <= 0 || m_type < 0)
 		    return false;
 
-		m_x = doc["x"];
-		m_y = doc["y"];
-		m_h = doc["h"];
-		m_w = doc["w"];
+		m_x = map(doc["x"], 0, 640, 0, 1000);
+		m_y = map(doc["y"], 0, 360, 0, 1000);
+		m_h = map(doc["h"], 0, 640, 0, 1000);
+		m_w = map(doc["w"], 0, 360, 0, 1000);
 		return true;
 	}
 	return false;
