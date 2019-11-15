@@ -360,6 +360,16 @@ void AutoCar::setMotor(int m1Speed)
 		analogWrite(pin_pwmB, 255 - m1Speed);
 	}
 	else {
+		analogWrite(pin_pwmA, 255 + 30);
+		analogWrite(pin_pwmB, 255 + 30);
+		analogWrite(pin_pwmA, 255 + 20);
+		analogWrite(pin_pwmB, 255 + 20);
+		analogWrite(pin_pwmA, 255 + 10);
+		analogWrite(pin_pwmB, 255 + 10);
+		analogWrite(pin_pwmA, 0);
+		analogWrite(pin_pwmB, 0);
+		delay(300);
+
 		digitalWrite(pin_pwmA, LOW);
 		digitalWrite(pin_dirA, HIGH);
 		digitalWrite(pin_pwmB, LOW);
@@ -393,7 +403,6 @@ void AutoCar::turnLeft(int angle)
 
 void AutoCar::turnRight(int angle)
 {
-	angle = angle * 0.6;
 	myservo.write(SERVOMID + angle);
 }
 
@@ -463,9 +472,9 @@ void AutoCar::forward()
 			if(ld<limit) {
 				setMotor(curve_speed);
 				if(ld == 0)
-					turnRight(50);
+					turnRight(30);
 				else
-					turnRight(25);
+					turnRight(15);
 			}
 			else {
 				setMotor(straight_speed);
