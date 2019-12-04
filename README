@@ -5,10 +5,10 @@ Copyright (C) 2019  VIA Technologies, Inc. All rights reserved.
 Changelog
 
 2019-12-04  Release v2.0.0
- * Add SmartSensor and SmartSensor-hwserial funcitons.
+ * Add SmartSensor and SmartSensor-hwserial functions.
  * Fix AutoCar bugs:
 	 - Add moto protection
-	 - Remove calibration of turn angel
+	 - Remove calibration of turn angle
 
 2019-03-12  Release v1.2.2 (supported vts8654x version v1.7.1)
  * AutoCar API refactoring
