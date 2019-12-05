@@ -379,8 +379,6 @@ void AutoCar::setMotor(int m1Speed)
 
 void AutoCar::drive(int speed)
 {
-	if(speed > 100)
-		speed = 100;
 	straight_speed = speed;
 	curve_speed = straight_speed + 5;
 	if(driverlessEnabled) {
