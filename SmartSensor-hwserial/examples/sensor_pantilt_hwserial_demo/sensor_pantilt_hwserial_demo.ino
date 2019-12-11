@@ -1,4 +1,4 @@
-﻿#include <SmartSensor-hwserial.h>
+#include <SmartSensor-hwserial.h>
 #include <Servo.h>
 
 #define IMG_CENTER_X  500
@@ -117,4 +117,3 @@ void loop()
 
     delay(20);
 }
-

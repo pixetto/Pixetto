@@ -1,4 +1,4 @@
-﻿#include <SmartSensor.h>
+#include <SmartSensor.h>
 
 #define rxPin 12
 #define txPin 10
@@ -82,5 +82,3 @@ void loop()
 
    delay(100);
  }
-
-

@@ -1,8 +1,11 @@
-Arduino libraries for vts8654x & vts8787
+Arduino libraries for vts8787 (Pixetto)
 
 Copyright (C) 2019  VIA Technologies, Inc. All rights reserved.
 
 Changelog
+
+2019-12-11  Release v3.0.0 (for Pixetto only)
+ * Only keep libraries for Smart Sensor. Remove all other libraries.
 
 2019-12-04  Release v2.0.0
  * Add SmartSensor and SmartSensor-hwserial functions.
