@@ -1,0 +1,12 @@
+SmartSensor	KEYWORD1
+
+begin		KEYWORD2
+end			KEYWORD2
+isDetected	KEYWORD2
+getFuncID	KEYWORD2
+getTypeID	KEYWORD2
+getPosX		KEYWORD2
+getPosY		KEYWORD2
+getHeight	KEYWORD2
+getWidth	KEYWORD2
+

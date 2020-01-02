@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define DINO_VERSION 1.0.3
+#define SMARTSENSOR_VERSION 1.0.3
 
 
 class SmartSensor
