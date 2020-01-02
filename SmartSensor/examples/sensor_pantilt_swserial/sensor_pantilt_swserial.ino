@@ -12,8 +12,8 @@
 #define servoXPin 9
 #define servoYPin 10
 
-#define rxPin 16
-#define txPin 17
+#define rxPin A2
+#define txPin A3
 
 SmartSensor ss(rxPin, txPin);
 
