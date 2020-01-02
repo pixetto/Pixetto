@@ -4,6 +4,9 @@ Copyright (C) 2019  VIA Technologies, Inc. All rights reserved.
 
 Changelog
 
+2020-01-02  Release v3.0.1
+ * Integrate SmartSensor classes for SoftwareSerial and HardwareSerial into one class.
+ 
 2019-12-11  Release v3.0.0 (for Pixetto only)
  * Only keep libraries for Smart Sensor. Remove all other libraries.
 
