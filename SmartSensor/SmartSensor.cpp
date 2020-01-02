@@ -1,5 +1,5 @@
-﻿/*
- * Copyright 2017 VIA Technologies, Inc. All Rights Reserved.
+/*
+ * Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
  *
  * This PROPRIETARY SOFTWARE is the property of WonderMedia Technologies, Inc.
  * and may contain trade secrets and/or other confidential information of
@@ -12,210 +12,103 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
  * ENJOYMENT OR NON-INFRINGEMENT.
  */
-#include "Arduino.h"
-#include <ArduinoJson.h>
+
+#include <Arduino.h>
 #include <SmartSensor.h>
 
-#define SENSOR_CMD_STREAMON  "{\"header\":\"STREAMON\"};"
-//#define SENSOR_CMD_QUERY	 "{\"header\":\"QUERY\"};"
+#define SS_FUNC(f, func) \
+	if (f == true) \
+	    return ss_hw->func(); \
+	else \
+	    return ss_sw->func();
 
-#define MAX_OPENCAM_ERROR   7
-#define MAX_JSON_ERROR   	7
-
-SmartSensor::SmartSensor(SoftwareSerial *_swSer)
- : m_id(0), m_type(0),
-   m_x(0), m_y(0), m_h(0), m_w(0),
-   swSerial(_swSer),
-   isCamOpened(false), hasDelayed(false), bSendStreamOn(false),
-   nJsonErrCount(0), nOpenCamFailCount(0)
+SmartSensor::SmartSensor(int RX, int TX)
+ : swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
 {
-
+	if (RX == 0 && TX == 1)
+	{
+	    m_flag = true;
+        ss_hw = new InnerSensor<HardwareSerial>(&Serial);
+    }
+	else
+	{
+	    m_flag = false;
+        swSer = new SoftwareSerial(RX,TX);
+		ss_sw = new InnerSensor<SoftwareSerial>(swSer);
+    }
 }
 
 SmartSensor::~SmartSensor()
 {
-
+	if (ss_hw)
+	{
+	    delete ss_hw;
+	    ss_hw = 0;
+	}
+	if (ss_sw)
+	{
+ 	    delete ss_sw;
+ 	    ss_sw = 0;
+	}
+	if (swSer)
+	{
+	    delete swSer;
+	    swSer = 0;
+	}
 }
 
-void SmartSensor::serialFlush()
-{
-	while (swSerial->available() > 0)
-	    char t = swSerial->read();
-
-}
 
 void SmartSensor::begin()
 {
-    swSerial->begin(38400);
-    hasDelayed = false;
-    isCamOpened = false;
-    bSendStreamOn = false;
-    nOpenCamFailCount = 0;
-    nJsonErrCount = 0;
+    SS_FUNC(m_flag, begin)
 }
 
 void SmartSensor::end()
 {
-    swSerial->end();
-}
-
-bool SmartSensor::openCam()
-{
-	if (isCamOpened)
-        return true;
-
-	if (!hasDelayed)
-	{
-		delay(4000);
-		hasDelayed = true;
-	}
-	else
-	    delay(1000);
-	    
-	if (!bSendStreamOn)
-	{
-	    serialFlush();
-	    // If it has not received response for the previous streamon cmd yet,
-	    // do not send streamon command again.
-		swSerial->print(SENSOR_CMD_STREAMON);
-        Serial.println("send: STREAMON");
-		bSendStreamOn = true;
- 	}
-
-    if (swSerial->available() > 0)
-    {
-        bSendStreamOn = false; // After receiving response, reset the flag
-
-        DynamicJsonDocument doc(256);
-		String s = swSerial->readStringUntil(';');
-		//Serial.print("recv:");
-		Serial.println(s);
-		DeserializationError error = deserializeJson(doc, s);
-		if (error)
-		{
-		    Serial.println("STREAMON CMD error!!");
-		    return false;
-		}
-
-		String hdr = doc["header"];
-		if (hdr == "CAM_SUCCESS")
-		{
-		    Serial.println("STREAMON OK!!");
-		    isCamOpened = true;
-		    return true;
- 		}
-		else
-		    Serial.println("STREAMON Failed!!");
-	}
-	else
-	{
-	    nOpenCamFailCount++;
-	 	if (nOpenCamFailCount > MAX_OPENCAM_ERROR)
-	 	{
-	 	    bSendStreamOn = false;
-	 	    nOpenCamFailCount = 0;
-		}
-	}
-	return false;
+    SS_FUNC(m_flag, end)
 }
 
 bool SmartSensor::isDetected()
 {
-	bool ret = openCam();
-    if (!ret)
-    {
-   	    Serial.println("openCam() failed");
-        return false;
-	}
-	//else
-	    //Serial.println("openCam() OK");
-
-
-    //serialFlush();
-	//swSerial->print(SENSOR_CMD_QUERY);
-	//Serial.println("send QUERY");
-
-	DynamicJsonDocument doc(256);
-
-    if (swSerial->available() > 0)
-    {
-		String s = swSerial->readStringUntil(';');
-		Serial.println(s);
-
-		DeserializationError error = deserializeJson(doc, s);
-		if (error)
-		{
-		    nJsonErrCount++;
-		    Serial.print("JSON Error:");
-		    Serial.println(nJsonErrCount);
-		    if (nJsonErrCount > MAX_JSON_ERROR)
-		    {
-		        this->end();
-		        delay(50);
-		        swSerial->begin(115200);
-		    	swSerial->print("reset\n");
-		    	swSerial->print("reset\n");
-		    	swSerial->print("reset\n");
-		    	swSerial->flush();
-    			Serial.println("send reset");
-                delay(50);
-                serialFlush();
-		        this->end();
-		        delay(50);
-
-          		this->begin();
-			}
-		    	
-			return false;
-		}
-		else
-		    nJsonErrCount = 0;
-		    
-		String hdr = doc["hdr"];
-        //Serial.println("RECEIVE HDR");
-		if (hdr != "DET")
-			return false;
-
-		m_id = doc["id"];
-		m_type = doc["t"];
-		if (m_id <= 0 || m_type < 0)
-		    return false;
-
-		m_x = map(doc["x"], 0, 640, 0, 1000);
-		m_y = map(doc["y"], 0, 360, 0, 1000);
-		m_h = map(doc["h"], 0, 640, 0, 1000);
-		m_w = map(doc["w"], 0, 360, 0, 1000);
-		return true;
-	}
-	return false;
+	SS_FUNC(m_flag, isDetected)
 }
 
 int SmartSensor::getFuncID()
 {
-	return m_id;
+    SS_FUNC(m_flag, getFuncID)
 }
 
 int SmartSensor::getTypeID()
 {
-	return m_type;
+    SS_FUNC(m_flag, getTypeID)
 }
 
 int SmartSensor::getPosX()
 {
-	return m_x;
+    SS_FUNC(m_flag, getPosX)
 }
 
 int SmartSensor::getPosY()
 {
-	return m_y;
+    SS_FUNC(m_flag, getPosY)
 }
 
 int SmartSensor::getH()
 {
-	return m_h;
+    SS_FUNC(m_flag, getH)
 }
 
 int SmartSensor::getW()
 {
-	return m_w;
+    SS_FUNC(m_flag, getW)
+}
+
+int SmartSensor::getHeight()
+{
+    SS_FUNC(m_flag, getH)
+}
+
+int SmartSensor::getWidth()
+{
+    SS_FUNC(m_flag, getW)
 }
