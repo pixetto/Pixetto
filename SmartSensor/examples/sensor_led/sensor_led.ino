@@ -1,10 +1,9 @@
-#include <SmartSensor.h>
+﻿#include <SmartSensor.h>
 
 #define rxPin 12
 #define txPin 10
 
-SoftwareSerial swSer = SoftwareSerial(rxPin, txPin);
-SmartSensor ss(&swSer);
+SmartSensor ss(rxPin, txPin);
 
 void setup()
 {

@@ -1,4 +1,4 @@
-#include <SmartSensor-hwserial.h>
+﻿#include <SmartSensor.h>
 #include <Servo.h>
 
 #define IMG_CENTER_X  500
@@ -12,7 +12,10 @@
 #define servoXPin 9
 #define servoYPin 10
 
-SmartSensor ss;
+#define rxPin 16
+#define txPin 17
+
+SmartSensor ss(rxPin, txPin);
 
 Servo servo_x;
 Servo servo_y;
@@ -34,6 +37,8 @@ int b = 0;
 
 void setup()
 {
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
   pinMode(servoXPin, OUTPUT);
   pinMode(servoYPin, OUTPUT);
 
