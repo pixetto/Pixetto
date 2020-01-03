@@ -1,17 +1,17 @@
 /*
- * Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
- *
- * This PROPRIETARY SOFTWARE is the property of WonderMedia Technologies, Inc.
- * and may contain trade secrets and/or other confidential information of
- * WonderMedia Technologies, Inc. This file shall not be disclosed to any third
- * party, in whole or in part, without prior written consent of WonderMedia.
- *
- * THIS PROPRIETARY SOFTWARE AND ANY RELATED DOCUMENTATION ARE PROVIDED AS IS,
- * WITH ALL FAULTS, AND WITHOUT WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED,
- * AND WonderMedia TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
- * ENJOYMENT OR NON-INFRINGEMENT.
- */
+* Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
+*
+* This PROPRIETARY SOFTWARE is the property of WonderMedia Technologies, Inc.
+* and may contain trade secrets and/or other confidential information of
+* WonderMedia Technologies, Inc. This file shall not be disclosed to any third
+* party, in whole or in part, without prior written consent of WonderMedia.
+*
+* THIS PROPRIETARY SOFTWARE AND ANY RELATED DOCUMENTATION ARE PROVIDED AS IS,
+* WITH ALL FAULTS, AND WITHOUT WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED,
+* AND WonderMedia TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
+* WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+* ENJOYMENT OR NON-INFRINGEMENT.
+*/
 #ifndef SmartSensor_h
 #define SmartSensor_h
 
@@ -24,23 +24,23 @@
 class SmartSensor
 {
 	public:
-        SmartSensor(int RX, int TX);
-        ~SmartSensor();
-
-        void begin();       // Initialize the SmartSensor
-        void end();         // Uninitialize the SmartSensor
-
-        bool isDetected();  // Is object detected?
-        int getFuncID();    // ID of the detected object
-        int getTypeID();    // Type ID (color or shape or...) of the detected object
-        int getPosX();      // x-coordinate of the upper-left corner of the detected bject
-        int getPosY();      // y-coordinate of the upper-left corner of the detected object
-        int getH();         // the height of the detected object
-        int getW();         // the width of the detected object
-        int getHeight();    // the height of the detected object
-        int getWidth();     // the width of the detected object
-
-        enum EFunc
+		SmartSensor(int RX, int TX);
+		~SmartSensor();
+		
+		void begin();       // Initialize the SmartSensor
+		void end();         // Uninitialize the SmartSensor
+		
+		bool isDetected();  // Is object detected?
+		int getFuncID();    // ID of the detected object
+		int getTypeID();    // Type ID (color or shape or...) of the detected object
+		int getPosX();      // x-coordinate of the upper-left corner of the detected bject
+		int getPosY();      // y-coordinate of the upper-left corner of the detected object
+		int getH();         // the height of the detected object
+		int getW();         // the width of the detected object
+		int getHeight();    // the height of the detected object
+		int getWidth();     // the width of the detected object
+		
+		enum EFunc
 		{
 			FUNC_COLOR_DETECTION		= 1,
 			FUNC_COLOR_CODE_DETECTION	= 2,
@@ -52,19 +52,19 @@ class SmartSensor
 			FUNC_FACE_DETECTION			= 11,
 			FUNC_TRAFFIC_SIGN_DETECTION	= 12,
 			FUNC_HANDWRITTEN_DIGITS_DETECTION	= 13,
-            FUNC_HANDWRITTEN_LETTERS_DETECTION   = 14
+			FUNC_HANDWRITTEN_LETTERS_DETECTION	= 14
 		};
-
+		
 		enum EColor
 		{
-		    COLOR_RED	= 1,
-		    COLOR_YELLOW,
-		    COLOR_GREEN,
-		    COLOR_BLUE,
-		    COLOR_PURPLE,
-		    COLOR_BLACK
+			COLOR_RED	= 1,
+			COLOR_YELLOW,
+			COLOR_GREEN,
+			COLOR_BLUE,
+			COLOR_PURPLE,
+			COLOR_BLACK
 		};
-
+		
 		enum EShape
 		{
 			SHAPE_ROUND = 1,
@@ -72,7 +72,7 @@ class SmartSensor
 			SHAPE_TRIANGLE,
 			SHAPE_PENTAGON
 		};
-
+		
 		enum ETrafficSign
 		{
 			SIGN_NO_ENTRE = 0,
@@ -100,10 +100,10 @@ class SmartSensor
 		};
 
 	private:
-	    SoftwareSerial *swSer;
-	    InnerSensor<HardwareSerial> *ss_hw;
-	    InnerSensor<SoftwareSerial> *ss_sw;
-	    bool m_flag;
+		SoftwareSerial *swSer;
+		InnerSensor<HardwareSerial> *ss_hw;
+		InnerSensor<SoftwareSerial> *ss_sw;
+		bool m_flag;
 };
 
 #endif

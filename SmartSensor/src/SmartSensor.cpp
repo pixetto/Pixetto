@@ -11,61 +11,61 @@
  * AND WonderMedia TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
  * ENJOYMENT OR NON-INFRINGEMENT.
- */
+*/
 
 #include <Arduino.h>
 #include <SmartSensor.h>
 
 #define SS_FUNC(f, func) \
 	if (f == true) \
-	    return ss_hw->func(); \
+		return ss_hw->func(); \
 	else \
-	    return ss_sw->func();
+		return ss_sw->func();
 
 SmartSensor::SmartSensor(int RX, int TX)
- : swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
+	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
 {
 	if (RX == 0 && TX == 1)
 	{
-	    m_flag = true;
-        ss_hw = new InnerSensor<HardwareSerial>(&Serial);
-    }
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
+	}
 	else
 	{
-	    m_flag = false;
-        swSer = new SoftwareSerial(RX,TX);
+		m_flag = false;
+		swSer = new SoftwareSerial(RX,TX);
 		ss_sw = new InnerSensor<SoftwareSerial>(swSer);
-    }
+	}
 }
 
 SmartSensor::~SmartSensor()
 {
 	if (ss_hw)
 	{
-	    delete ss_hw;
-	    ss_hw = 0;
+		delete ss_hw;
+		ss_hw = 0;
 	}
 	if (ss_sw)
 	{
- 	    delete ss_sw;
- 	    ss_sw = 0;
+		delete ss_sw;
+		ss_sw = 0;
 	}
 	if (swSer)
 	{
-	    delete swSer;
-	    swSer = 0;
+		delete swSer;
+		swSer = 0;
 	}
 }
 
 
 void SmartSensor::begin()
 {
-    SS_FUNC(m_flag, begin)
+	SS_FUNC(m_flag, begin)
 }
 
 void SmartSensor::end()
 {
-    SS_FUNC(m_flag, end)
+	SS_FUNC(m_flag, end)
 }
 
 bool SmartSensor::isDetected()
@@ -75,40 +75,40 @@ bool SmartSensor::isDetected()
 
 int SmartSensor::getFuncID()
 {
-    SS_FUNC(m_flag, getFuncID)
+	SS_FUNC(m_flag, getFuncID)
 }
 
 int SmartSensor::getTypeID()
 {
-    SS_FUNC(m_flag, getTypeID)
+	SS_FUNC(m_flag, getTypeID)
 }
 
 int SmartSensor::getPosX()
 {
-    SS_FUNC(m_flag, getPosX)
+	SS_FUNC(m_flag, getPosX)
 }
 
 int SmartSensor::getPosY()
 {
-    SS_FUNC(m_flag, getPosY)
+	SS_FUNC(m_flag, getPosY)
 }
 
 int SmartSensor::getH()
 {
-    SS_FUNC(m_flag, getH)
+	SS_FUNC(m_flag, getH)
 }
 
 int SmartSensor::getW()
 {
-    SS_FUNC(m_flag, getW)
+	SS_FUNC(m_flag, getW)
 }
 
 int SmartSensor::getHeight()
 {
-    SS_FUNC(m_flag, getH)
+	SS_FUNC(m_flag, getH)
 }
 
 int SmartSensor::getWidth()
 {
-    SS_FUNC(m_flag, getW)
+	SS_FUNC(m_flag, getW)
 }
