@@ -12,8 +12,14 @@
 #define servoXPin 9
 #define servoYPin 10
 
-#define rxPin 0
-#define txPin 1
+// SoftwareSerial pins
+#define rxPin A2
+#define txPin A3
+
+// HardwareSerial pins
+//#define rxPin 0
+//#define txPin 1
+
 
 SmartSensor ss(rxPin, txPin);
 

@@ -22,19 +22,19 @@ template <class SerType>
 class InnerSensor
 {
 	public:
-        InnerSensor(SerType* p); // 傳入串口物件 (SoftwareSerial or HardwareSerial)
+        InnerSensor(SerType* p); // SoftwareSerial or HardwareSerial
         ~InnerSensor();
 
         void begin();
         void end();
 
-        bool isDetected();  // 是否偵測到物件
-        int getFuncID();    // 偵測物的功能ID
-        int getTypeID();    // 該功能有Type才有值 (顏色 or 形狀ID)
-        int getPosX();      // 偵測到物件的中心位置x座標
-        int getPosY();      // 偵測到物件的中心位置y座標
-        int getH();         // 物件高度
-        int getW();         // 物件寬度
+        bool isDetected();
+        int getFuncID();
+        int getTypeID();
+        int getPosX();
+        int getPosY();
+        int getH();
+        int getW();
 
 	private:
 	    void serialFlush();

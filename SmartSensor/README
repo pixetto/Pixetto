@@ -4,6 +4,8 @@ Copyright (C) 2020  VIA Technologies, Inc. All rights reserved.
 
 Changelog
 
-2020-01-02  Release v1.0.3
+2020-01-03  Release v1.0.3
  * Integrate SmartSensor classes for SoftwareSerial and HardwareSerial into one class.
+ * Provide two examples ColorDetectionWithLED, ObjectTrackingWithPanTilt
+ * Add library.properties, keywords.txt, README file.
  

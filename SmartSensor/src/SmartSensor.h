@@ -27,18 +27,18 @@ class SmartSensor
         SmartSensor(int RX, int TX);
         ~SmartSensor();
 
-        void begin();
-        void end();
+        void begin();       // Initialize the SmartSensor
+        void end();         // Uninitialize the SmartSensor
 
-        bool isDetected();  // 是否偵測到物件
-        int getFuncID();    // 偵測物的功能ID
-        int getTypeID();    // 該功能有Type才有值 (顏色 or 形狀ID)
-        int getPosX();      // 偵測到物件的中心位置x座標
-        int getPosY();      // 偵測到物件的中心位置y座標
-        int getH();         // 物件高度
-        int getW();         // 物件寬度
-        int getHeight();    // 物件高度
-        int getWidth();     // 物件寬度
+        bool isDetected();  // Is object detected?
+        int getFuncID();    // ID of the detected object
+        int getTypeID();    // Type ID (color or shape or...) of the detected object
+        int getPosX();      // x-coordinate of the upper-left corner of the detected bject
+        int getPosY();      // y-coordinate of the upper-left corner of the detected object
+        int getH();         // the height of the detected object
+        int getW();         // the width of the detected object
+        int getHeight();    // the height of the detected object
+        int getWidth();     // the width of the detected object
 
         enum EFunc
 		{

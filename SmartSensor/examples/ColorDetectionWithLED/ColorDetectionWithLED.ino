@@ -1,7 +1,12 @@
 #include <SmartSensor.h>
 
+// SoftwareSerial pins
 #define rxPin 12
 #define txPin 10
+
+// HardwareSerial pins
+//#define rxPin 0
+//#define txPin 1
 
 SmartSensor ss(rxPin, txPin);
 
