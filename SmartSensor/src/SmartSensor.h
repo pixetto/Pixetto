@@ -96,7 +96,31 @@ public:
 
 	enum ELetters
 	{
-		A=0,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,X,Y,Z
+		LETTER_A=0,
+		LETTER_B,
+		LETTER_C,
+		LETTER_D,
+		LETTER_E,
+		LETTER_F,
+		LETTER_G,
+		LETTER_H,
+		LETTER_I,
+		LETTER_J,
+		LETTER_K,
+		LETTER_L,
+		LETTER_M,
+		LETTER_N,
+		LETTER_O,
+		LETTER_P,
+		LETTER_Q,
+		LETTER_R,
+		LETTER_S,
+		LETTER_T,
+		LETTER_U,
+		LETTER_V,
+		LETTER_X,
+		LETTER_Y,
+		LETTER_Z
 	};
 
 private:
