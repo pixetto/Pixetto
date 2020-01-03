@@ -20,37 +20,37 @@
 template <class SerType>
 class InnerSensor
 {
-	public:
-		InnerSensor(SerType* p); // SoftwareSerial or HardwareSerial
-		~InnerSensor();
-		
-		void begin();
-		void end();
-		
-		bool isDetected();
-		int getFuncID();
-		int getTypeID();
-		int getPosX();
-		int getPosY();
-		int getH();
-		int getW();
+public:
+	InnerSensor(SerType* p); // SoftwareSerial or HardwareSerial
+	~InnerSensor();
 	
-	private:
-		void serialFlush();
-		bool openCam();
-		bool isCamOpened;
-		bool bSendStreamOn;
-		bool hasDelayed;
-		int  nOpenCamFailCount;
-		int  nJsonErrCount;
-		
-		SerType *swSerial;
-		int m_id;
-		int m_type;
-		int m_x;
-		int m_y;
-		int m_h;
-		int m_w;
+	void begin();
+	void end();
+	
+	bool isDetected();
+	int getFuncID();
+	int getTypeID();
+	int getPosX();
+	int getPosY();
+	int getH();
+	int getW();
+
+private:
+	void serialFlush();
+	bool openCam();
+	bool isCamOpened;
+	bool bSendStreamOn;
+	bool hasDelayed;
+	int  nOpenCamFailCount;
+	int  nJsonErrCount;
+	
+	SerType *swSerial;
+	int m_id;
+	int m_type;
+	int m_x;
+	int m_y;
+	int m_h;
+	int m_w;
 };
 
 
