@@ -22,10 +22,10 @@
 	else \
 		return ss_sw->func();
 
-SmartSensor::SmartSensor(int RX, int TX)
+SmartSensor::SmartSensor(int rx, int tx)
 	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
 {
-	if (RX == 0 && TX == 1)
+	if (rx == 0 && tx == 1)
 	{
 		m_flag = true;
 		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
@@ -33,7 +33,7 @@ SmartSensor::SmartSensor(int RX, int TX)
 	else
 	{
 		m_flag = false;
-		swSer = new SoftwareSerial(RX,TX);
+		swSer = new SoftwareSerial(rx,tx);
 		ss_sw = new InnerSensor<SoftwareSerial>(swSer);
 	}
 }

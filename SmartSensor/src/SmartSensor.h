@@ -18,13 +18,13 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 2.0.0
+#define SMARTSENSOR_VERSION 1.0.4
 
 
 class SmartSensor
 {
 public:
-	SmartSensor(int RX, int TX);
+	SmartSensor(int rx, int tx);
 	~SmartSensor();
 	
 	void begin();       // Initialize the SmartSensor
