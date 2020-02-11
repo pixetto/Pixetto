@@ -36,6 +36,8 @@ public:
 private:
 	void serialFlush();
 	bool openCam();
+	bool verifyChecksum(uint8_t *buf, int len);
+	
 	bool isCamOpened;
 	bool bSendStreamOn;
 	bool hasDelayed;
@@ -212,6 +214,21 @@ bool InnerSensor<SerType>::openCam()
 
 
 template <class SerType>
+bool InnerSensor<SerType>::verifyChecksum(uint8_t *buf, int len)
+{
+	uint8_t sum = 0;
+	
+	for (uint8_t i=1; i<len-2; i++)
+		sum += buf[i];
+	
+	if (sum == PXT_PACKET_START || sum == PXT_PACKET_END)
+		sum = 0xAA;
+	
+	return (sum == buf[8]);
+}
+
+
+template <class SerType>
 bool InnerSensor<SerType>::isDetected()
 {
 	bool ret = openCam();
@@ -239,6 +256,7 @@ bool InnerSensor<SerType>::isDetected()
 		uint8_t input;
 		int i=0;
 		int nodata=0;
+		bool correct=false;
 		
 		while ((input = swSerial->read()) != PXT_PACKET_START)
 		{
@@ -249,6 +267,9 @@ bool InnerSensor<SerType>::isDetected()
 		
 		while ((input = swSerial->read()) != PXT_PACKET_END)
 		{
+			if (i >= 10)
+				break;
+
 			if (input == 0xFF) // no data
 			{
 				delay(1);
@@ -261,17 +282,15 @@ bool InnerSensor<SerType>::isDetected()
 				
 			if (input == PXT_PACKET_START)
 				i = 0;
-				
-			if (i >= 10)
-				break;
 
 			buffer[i++] = input;
 			nodata = 0;
 		}
 		
 		if (i == 9) 
-		{	
+		{
 			buffer[i] = input;
+	
 #ifdef DEBUG_LOG
 			Serial.print("recv: ");
 			for (int j=0; j<10; j++)
@@ -279,52 +298,66 @@ bool InnerSensor<SerType>::isDetected()
 				Serial.print(buffer[j], DEC);
 				Serial.print(" ");
 			}
-			Serial.println("\n");
 #endif		
-		
-			nJsonErrCount = 0;
-		}
-		else // error
-		{
-			nJsonErrCount++;
-#ifdef DEBUG_LOG
-			Serial.print("Received Error:");
-			Serial.println(nJsonErrCount);
-#endif
-			if (nJsonErrCount > MAX_JSON_ERROR)
+		    correct = verifyChecksum(buffer, 10);
+			if (correct)
 			{
-				this->end();
-				delay(50);
-				swSerial->begin(115200);
-				swSerial->print("reset\n");
-				swSerial->print("reset\n");
-				swSerial->print("reset\n");
-				swSerial->flush();
-#ifdef DEBUG_LOG
-				Serial.println("send reset");
-#endif
-				delay(50);
-				serialFlush();
-				this->end();
-				delay(50);
+				nJsonErrCount = 0;
 				
-				this->begin();
-			}
-		
-			return false;
-		}
-		                            
-		m_id = buffer[2];
-		m_type = buffer[3];
-		if (m_id <= 0 || m_type < 0)
-			return false;
-	
-		m_x = buffer[4];
-		m_y = buffer[5];
-		m_w = buffer[6];
-		m_h = buffer[7];
+				m_id = buffer[2];
+				m_type = buffer[3];
 
-		return true;
+				if (m_id <= 0 || m_type < 0)
+				{
+#ifdef DEBUG_LOG
+					Serial.println("  incorrect values!!");
+#endif
+					return false;
+				}
+
+				Serial.println("  OK!! ");
+				m_x = buffer[4];
+				m_y = buffer[5];
+				m_w = buffer[6];
+				m_h = buffer[7];
+		
+				return true;
+			}
+			else // validate checksum failed
+			{
+#ifdef DEBUG_LOG
+				Serial.println("  WRONG!! ");
+#endif			
+		    }
+		}
+		
+		// Received Error
+		nJsonErrCount++;
+#ifdef DEBUG_LOG
+		Serial.print("Received Error:");
+		Serial.println(nJsonErrCount);
+#endif
+		if (nJsonErrCount > MAX_JSON_ERROR)
+		{
+			this->end();
+			delay(50);
+			swSerial->begin(115200);
+			swSerial->print("reset\n");
+			swSerial->print("reset\n");
+			swSerial->print("reset\n");
+			swSerial->flush();
+#ifdef DEBUG_LOG
+			Serial.println("send reset");
+#endif
+			delay(50);
+			serialFlush();
+			this->end();
+			delay(50);
+			
+			this->begin();
+		}
+		
+		return false;
 	}
 	return false;
 }
