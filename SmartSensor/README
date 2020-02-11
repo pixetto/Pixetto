@@ -9,3 +9,7 @@ Changelog
  * Provide two examples ColorDetectionWithLED, ObjectTrackingWithPanTilt
  * Add library.properties, keywords.txt, README file.
  
+2020-02-11	Release v2.0.0
+ * Replace JSON format with HEX format.
+ * Change the range of X,Y,Width,Height values from 0~1000 to 0~100.
+ * Note that it's not backward compatible, and requires Pixetto firmware with at least v1.0.0. 

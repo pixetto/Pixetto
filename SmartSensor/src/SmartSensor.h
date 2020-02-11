@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.3
+#define SMARTSENSOR_VERSION 2.0.0
 
 
 class SmartSensor
@@ -57,7 +57,7 @@ public:
 	
 	enum EColor
 	{
-		COLOR_RED	= 1,
+		COLOR_RED = 1,
 		COLOR_YELLOW,
 		COLOR_GREEN,
 		COLOR_BLUE,

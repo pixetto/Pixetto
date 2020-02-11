@@ -15,8 +15,6 @@
 #ifndef InnerSensor_h
 #define InnerSensor_h
 
-#include <ArduinoJson.h>
-
 template <class SerType>
 class InnerSensor
 {
@@ -34,7 +32,7 @@ public:
 	int getPosY();
 	int getH();
 	int getW();
-
+	
 private:
 	void serialFlush();
 	bool openCam();
@@ -53,9 +51,17 @@ private:
 	int m_w;
 };
 
+#define PXT_PACKET_START 	0xFD
+#define PXT_PACKET_END   	0xFE
 
-#define SENSOR_CMD_STREAMON  "{\"header\":\"STREAMON\"};"
+#define PXT_CMD_STREAMON	0x79
+
+#define PXT_RET_CAM_SUCCESS	0xE0
+#define PXT_RET_CAM_ERROR	0xE1
+
+//#define SENSOR_CMD_STREAMON  "{\"header\":\"STREAMON\"};"
 //#define SENSOR_CMD_QUERY	 "{\"header\":\"QUERY\"};"
+const uint8_t SENSOR_CMD_STREAMON[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMON, 0, PXT_PACKET_END};
 
 #define MAX_OPENCAM_ERROR   7
 #define MAX_JSON_ERROR   	7
@@ -88,13 +94,13 @@ void InnerSensor<SerType>::serialFlush()
 
 template <class SerType>
 void InnerSensor<SerType>::begin()
-{
+{                            
 	swSerial->begin(38400);
 	hasDelayed = false;
 	isCamOpened = false;
 	bSendStreamOn = false;
 	nOpenCamFailCount = 0;
-	nJsonErrCount = 0;
+	nJsonErrCount = 0;  
 }
 
 template <class SerType>
@@ -111,18 +117,18 @@ bool InnerSensor<SerType>::openCam()
 	
 	if (!hasDelayed)
 	{
-		delay(4000);
+		delay(5000); // depends on pixetto start-up time
 		hasDelayed = true;
 	}
 	else
 		delay(1000);
 
+	// If it has not received response for the previous streamon cmd yet,
+	// do not send streamon command again.
 	if (!bSendStreamOn)
 	{
 		serialFlush();
-		// If it has not received response for the previous streamon cmd yet,
-		// do not send streamon command again.
-		swSerial->print(SENSOR_CMD_STREAMON);
+		swSerial->write(SENSOR_CMD_STREAMON, sizeof(SENSOR_CMD_STREAMON)/sizeof(uint8_t));
 	
 #ifdef DEBUG_LOG
 		Serial.println("send: STREAMON");
@@ -132,25 +138,52 @@ bool InnerSensor<SerType>::openCam()
 
 	if (swSerial->available() > 0)
 	{
-		bSendStreamOn = false; // After receiving response, reset the flag
+		bSendStreamOn = false; // After receiving any response, reset the flag
 	
-		DynamicJsonDocument doc(256);
-		String s = swSerial->readStringUntil(';');
-#ifdef DEBUG_LOG
-		//Serial.print("recv:");
-		Serial.println(s);
-#endif
-		DeserializationError error = deserializeJson(doc, s);
-		if (error)
+		uint8_t buffer[10];
+		uint8_t input;
+		int i=0;
+		int nodata=0;
+		
+		while ((input = swSerial->read()) != PXT_PACKET_START)
 		{
-#ifdef DEBUG_LOG
-			Serial.println("STREAMON CMD error!!");
-#endif
-			return false;
+			if (input == 0xFF) // no data
+				return false;
+
+			continue;
 		}
 
-		String hdr = doc["header"];
-		if (hdr == "CAM_SUCCESS")
+		buffer[i++] = input;
+		 		
+		while ((input = swSerial->read()) != PXT_PACKET_END)
+		{
+			if (input == 0xFF) // no data 
+			{
+				delay(1);
+				nodata++;
+				if (nodata > 10)
+					return false;
+				else
+					continue;
+			}
+
+			if (input == PXT_PACKET_START)
+				i = 0;
+
+			if (i >= 4)
+			{
+#ifdef DEBUG_LOG
+				Serial.println("");
+				Serial.println("STREAMON CMD error!!");
+#endif
+				return false;
+			}
+			buffer[i++] = input;
+			nodata = 0;
+		}	
+		buffer[i] = input;
+
+		if (buffer[2] == PXT_RET_CAM_SUCCESS)
 		{
 #ifdef DEBUG_LOG
 			Serial.println("STREAMON OK!!");
@@ -177,6 +210,7 @@ bool InnerSensor<SerType>::openCam()
 	return false;
 }
 
+
 template <class SerType>
 bool InnerSensor<SerType>::isDetected()
 {
@@ -188,29 +222,73 @@ bool InnerSensor<SerType>::isDetected()
 #endif
 		return false;
 	}
+#ifdef DEBUG_LOG
 	//else
 	//	Serial.println("openCam() OK");
+#endif
 	
 	
 	//serialFlush();
 	//swSerial->print(SENSOR_CMD_QUERY);
 	//Serial.println("send QUERY");
 
-	DynamicJsonDocument doc(256);
 
 	if (swSerial->available() > 0)
 	{
-		String s = swSerial->readStringUntil(';');
+		uint8_t buffer[10];
+		uint8_t input;
+		int i=0;
+		int nodata=0;
+		
+		while ((input = swSerial->read()) != PXT_PACKET_START)
+		{
+			if (input == 0xFF) // no data
+				return false;
+		}
+		buffer[i++] = input;
+		
+		while ((input = swSerial->read()) != PXT_PACKET_END)
+		{
+			if (input == 0xFF) // no data
+			{
+				delay(1);
+				nodata++;
+				if (nodata > 10)
+					return false;
+				else
+					continue;
+			}
+				
+			if (input == PXT_PACKET_START)
+				i = 0;
+				
+			if (i >= 10)
+				break;
+
+			buffer[i++] = input;
+			nodata = 0;
+		}
+		
+		if (i == 9) 
+		{	
+			buffer[i] = input;
 #ifdef DEBUG_LOG
-		Serial.println(s);
-#endif
-	
-		DeserializationError error = deserializeJson(doc, s);
-		if (error)
+			Serial.print("recv: ");
+			for (int j=0; j<10; j++)
+			{
+				Serial.print(buffer[j], DEC);
+				Serial.print(" ");
+			}
+			Serial.println("\n");
+#endif		
+		
+			nJsonErrCount = 0;
+		}
+		else // error
 		{
 			nJsonErrCount++;
 #ifdef DEBUG_LOG
-			Serial.print("JSON Error:");
+			Serial.print("Received Error:");
 			Serial.println(nJsonErrCount);
 #endif
 			if (nJsonErrCount > MAX_JSON_ERROR)
@@ -235,23 +313,17 @@ bool InnerSensor<SerType>::isDetected()
 		
 			return false;
 		}
-		else
-			nJsonErrCount = 0;
-		
-		String hdr = doc["hdr"];
-		//Serial.println("RECEIVE HDR");
-		if (hdr != "DET")
-			return false;
-	
-		m_id = doc["id"];
-		m_type = doc["t"];
+		                            
+		m_id = buffer[2];
+		m_type = buffer[3];
 		if (m_id <= 0 || m_type < 0)
 			return false;
 	
-		m_x = map(doc["x"], 0, 640, 0, 1000);
-		m_y = map(doc["y"], 0, 360, 0, 1000);
-		m_h = map(doc["h"], 0, 640, 0, 1000);
-		m_w = map(doc["w"], 0, 360, 0, 1000);
+		m_x = buffer[4];
+		m_y = buffer[5];
+		m_w = buffer[6];
+		m_h = buffer[7];
+
 		return true;
 	}
 	return false;

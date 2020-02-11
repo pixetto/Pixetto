@@ -1,8 +1,8 @@
 #include <SmartSensor.h>
 #include <Servo.h>
 
-#define IMG_CENTER_X  500
-#define IMG_CENTER_Y  500
+#define IMG_CENTER_X  50
+#define IMG_CENTER_Y  50
 #define MIN_DEG_X   20
 #define MAX_DEG_X   160
 #define MIN_DEG_Y   20
@@ -69,10 +69,10 @@ void loop()
 
 		nCenterX = nPosX + nPosW/2;
 
-		if (nCenterX > IMG_CENTER_X + 60)
+		if (nCenterX > IMG_CENTER_X + 6)
 		{
 			diffX = nCenterX - IMG_CENTER_X;
-			moveX = map(diffX, 60,IMG_CENTER_X,0,20);
+			moveX = map(diffX, 6,IMG_CENTER_X,0,20);
 
 			b = servo_y.read();
 			if (b < DEG_CENTER)
@@ -87,10 +87,10 @@ void loop()
 			}
 			servo_x.write(a);
 		}
-		else if (nCenterX < IMG_CENTER_X - 60)
+		else if (nCenterX < IMG_CENTER_X - 6)
 		{
 			diffX = IMG_CENTER_X - nCenterX;
-			moveX = map(diffX, 60,IMG_CENTER_X,0,20);
+			moveX = map(diffX, 6,IMG_CENTER_X,0,20);
 
 			b = servo_y.read();
 			if (b < DEG_CENTER)
@@ -108,23 +108,23 @@ void loop()
 
 		nCenterY = nPosY + nPosH/2;
 
-		if (nCenterY > IMG_CENTER_Y + 80)
+		if (nCenterY > IMG_CENTER_Y + 8)
 		{
 			diffY = nCenterY - IMG_CENTER_Y;
-			moveY = map(diffY, 80,IMG_CENTER_Y,0,12);
+			moveY = map(diffY, 8,IMG_CENTER_Y,0,12);
 			b = servo_y.read() - moveY;
 			if (b < MIN_DEG_Y) b = MIN_DEG_Y;
 			servo_y.write(b);
 		}
-		else if (nCenterY < IMG_CENTER_Y - 80)
+		else if (nCenterY < IMG_CENTER_Y - 8)
 		{
 			diffY = IMG_CENTER_Y - nCenterY;
-			moveY = map(diffY, 80,IMG_CENTER_Y,0,12);
+			moveY = map(diffY, 8,IMG_CENTER_Y,0,12);
 			b = servo_y.read() + moveY;
 			if (b > MAX_DEG_Y) b = MAX_DEG_Y;
 			servo_y.write(b);
 		}
 	}
 
-	delay(20);
+	//delay(20);
 }
