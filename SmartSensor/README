@@ -9,7 +9,7 @@ Changelog
  * Provide two examples ColorDetectionWithLED, ObjectTrackingWithPanTilt
  * Add library.properties, keywords.txt, README file.
  
-2020-02-11	Release v2.0.0
+2020-02-11	Release v1.0.4
  * Replace JSON format with HEX format for data packets.
  * Add checksum.
  * Change the range of X,Y,Width,Height values from 0~1000 to 0~100.
