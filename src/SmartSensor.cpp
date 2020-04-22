@@ -16,11 +16,12 @@
 #include <Arduino.h>
 #include <SmartSensor.h>
 
-#define SS_FUNC(f, func) \
+#define SS_FUNC(f, func, ...) \
 	if (f == true) \
-		return ss_hw->func(); \
+		return ss_hw->func(__VA_ARGS__); \
 	else \
-		return ss_sw->func();
+		return ss_sw->func(__VA_ARGS__);
+
 
 SmartSensor::SmartSensor(int rx, int tx)
 	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
@@ -57,6 +58,10 @@ SmartSensor::~SmartSensor()
 	}
 }
 
+void SmartSensor::EnableUVC(bool uvc)
+{
+	SS_FUNC(m_flag, EnableUVC, uvc)
+}
 
 void SmartSensor::begin()
 {

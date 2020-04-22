@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.4
+#define SMARTSENSOR_VERSION 1.0.5
 
 
 class SmartSensor
@@ -27,7 +27,8 @@ public:
 	SmartSensor(int rx, int tx);
 	~SmartSensor();
 	
-	void begin();       // Initialize the SmartSensor
+	void EnableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
+	void begin();		// Initialize the SmartSensor
 	void end();         // Uninitialize the SmartSensor
 	
 	bool isDetected();  // Is object detected?

@@ -14,3 +14,7 @@ Changelog
  * Add checksum.
  * Change the range of X,Y,Width,Height values from 0~1000 to 0~100.
  * Note that it's not backward compatible, and requires Pixetto firmware with at least v1.0.0. 
+
+ 2020-02-11	Release v1.0.5
+ * Add EnableUVC() function to support UVC mode. 
+   For the case of using Pixetto's USB and grove port simultaneously, it should switch to UVC mode. 

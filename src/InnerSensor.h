@@ -22,6 +22,7 @@ public:
 	InnerSensor(SerType* p); // SoftwareSerial or HardwareSerial
 	~InnerSensor();
 	
+	void EnableUVC(bool uvc);
 	void begin();
 	void end();
 	
@@ -43,6 +44,7 @@ private:
 	bool hasDelayed;
 	int  nOpenCamFailCount;
 	int  nJsonErrCount;
+	bool bEnableUVC;
 	
 	SerType *swSerial;
 	int m_id;
@@ -75,7 +77,7 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	: m_id(0), m_type(0),
 	m_x(0), m_y(0), m_h(0), m_w(0),
 	isCamOpened(false), hasDelayed(false), bSendStreamOn(false),
-	nJsonErrCount(0), nOpenCamFailCount(0)
+	nJsonErrCount(0), nOpenCamFailCount(0), bEnableUVC(false)
 {
 	swSerial = p;
 }
@@ -92,6 +94,12 @@ void InnerSensor<SerType>::serialFlush()
 {
 	while (swSerial->available() > 0)
 		char t = swSerial->read();
+}
+
+template <class SerType>
+void InnerSensor<SerType>::EnableUVC(bool uvc)
+{
+	bEnableUVC = uvc;	                            
 }
 
 template <class SerType>
@@ -213,6 +221,7 @@ bool InnerSensor<SerType>::openCam()
 }
 
 
+
 template <class SerType>
 bool InnerSensor<SerType>::verifyChecksum(uint8_t *buf, int len)
 {
@@ -231,24 +240,22 @@ bool InnerSensor<SerType>::verifyChecksum(uint8_t *buf, int len)
 template <class SerType>
 bool InnerSensor<SerType>::isDetected()
 {
-	bool ret = openCam();
-	if (!ret)
+	if (!bEnableUVC)
 	{
+		bool ret = openCam();
+		if (!ret)
+		{
 #ifdef DEBUG_LOG
-		Serial.println("openCam() failed");
+			Serial.println("openCam() failed");
 #endif
-		return false;
+			return false;
+		}
+#ifdef DEBUG_LOG
+		//else
+		//	Serial.println("openCam() OK");
+#endif
 	}
-#ifdef DEBUG_LOG
-	//else
-	//	Serial.println("openCam() OK");
-#endif
 	
-	
-	//serialFlush();
-	//swSerial->print(SENSOR_CMD_QUERY);
-	//Serial.println("send QUERY");
-
 
 	if (swSerial->available() > 0)
 	{
