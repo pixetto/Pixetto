@@ -22,7 +22,7 @@ public:
 	InnerSensor(SerType* p); // SoftwareSerial or HardwareSerial
 	~InnerSensor();
 	
-	void EnableUVC(bool uvc);
+	void enableUVC(bool uvc);
 	void begin();
 	void end();
 	
@@ -33,6 +33,7 @@ public:
 	int getPosY();
 	int getH();
 	int getW();
+	int numObjects();
 	
 private:
 	void serialFlush();
@@ -45,6 +46,7 @@ private:
 	int  nOpenCamFailCount;
 	int  nJsonErrCount;
 	bool bEnableUVC;
+	unsigned long nTime4ObjNum;
 	
 	SerType *swSerial;
 	int m_id;
@@ -53,6 +55,7 @@ private:
 	int m_y;
 	int m_h;
 	int m_w;
+	int m_objnum;
 };
 
 #define PXT_PACKET_START 	0xFD
@@ -63,12 +66,14 @@ private:
 #define PXT_RET_CAM_SUCCESS	0xE0
 #define PXT_RET_CAM_ERROR	0xE1
 
+#define PXT_RET_OBJNUM		0x46 //70
+
 //#define SENSOR_CMD_STREAMON  "{\"header\":\"STREAMON\"};"
 //#define SENSOR_CMD_QUERY	 "{\"header\":\"QUERY\"};"
 const uint8_t SENSOR_CMD_STREAMON[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMON, 0, PXT_PACKET_END};
 
 #define MAX_OPENCAM_ERROR   7
-#define MAX_JSON_ERROR   	7
+#define MAX_JSON_ERROR   	30
 
 //#define DEBUG_LOG
 
@@ -77,7 +82,7 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	: m_id(0), m_type(0),
 	m_x(0), m_y(0), m_h(0), m_w(0),
 	isCamOpened(false), hasDelayed(false), bSendStreamOn(false),
-	nJsonErrCount(0), nOpenCamFailCount(0), bEnableUVC(false)
+	nJsonErrCount(0), nOpenCamFailCount(0), bEnableUVC(false), nTime4ObjNum(0)
 {
 	swSerial = p;
 }
@@ -97,7 +102,7 @@ void InnerSensor<SerType>::serialFlush()
 }
 
 template <class SerType>
-void InnerSensor<SerType>::EnableUVC(bool uvc)
+void InnerSensor<SerType>::enableUVC(bool uvc)
 {
 	bEnableUVC = uvc;	                            
 }
@@ -302,7 +307,7 @@ bool InnerSensor<SerType>::isDetected()
 			Serial.print("recv: ");
 			for (int j=0; j<10; j++)
 			{
-				Serial.print(buffer[j], DEC);
+				Serial.print(buffer[j], HEX);
 				Serial.print(" ");
 			}
 #endif		
@@ -322,7 +327,20 @@ bool InnerSensor<SerType>::isDetected()
 					return false;
 				}
 
+
+   				if (m_id == PXT_RET_OBJNUM) {
+   					if (m_type > 0) { 
+   					    m_objnum  = m_type;
+   					    nTime4ObjNum = millis();
+   					}
+   					//else if (m_type == 0 && (millis() - nTime4ObjNum) > 1000) {
+					//	m_objnum  = m_type;
+					//}
+					return isDetected();
+				}
+#ifdef DEBUG_LOG
 				Serial.println("  OK!! ");
+#endif				
 				m_x = buffer[4];
 				m_y = buffer[5];
 				m_w = buffer[6];
@@ -393,8 +411,8 @@ int InnerSensor<SerType>::getPosY()
 	return m_y;
 }
 
-template <class T>
-int InnerSensor<T>::getH()
+template <class SerType>
+int InnerSensor<SerType>::getH()
 {
 	return m_h;
 }
@@ -403,6 +421,14 @@ template <class SerType>
 int InnerSensor<SerType>::getW()
 {
 	return m_w;
+}
+
+template <class SerType>
+int InnerSensor<SerType>::numObjects()
+{
+	if ((millis() - nTime4ObjNum) > 1000)
+		m_objnum = 0;
+	return m_objnum;    
 }
 
 #endif

@@ -58,9 +58,9 @@ SmartSensor::~SmartSensor()
 	}
 }
 
-void SmartSensor::EnableUVC(bool uvc)
+void SmartSensor::enableUVC(bool uvc)
 {
-	SS_FUNC(m_flag, EnableUVC, uvc)
+	SS_FUNC(m_flag, enableUVC, uvc)
 }
 
 void SmartSensor::begin()
@@ -116,4 +116,9 @@ int SmartSensor::getHeight()
 int SmartSensor::getWidth()
 {
 	SS_FUNC(m_flag, getW)
+}
+
+int SmartSensor::numObjects()
+{
+	SS_FUNC(m_flag, numObjects)
 }

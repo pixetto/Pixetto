@@ -27,7 +27,7 @@ public:
 	SmartSensor(int rx, int tx);
 	~SmartSensor();
 	
-	void EnableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
+	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
 	void begin();		// Initialize the SmartSensor
 	void end();         // Uninitialize the SmartSensor
 	
@@ -40,6 +40,7 @@ public:
 	int getW();         // the width of the detected object
 	int getHeight();    // the height of the detected object
 	int getWidth();     // the width of the detected object
+	int	numObjects();	// the number of detected objects
 	
 	enum EFunc
 	{
