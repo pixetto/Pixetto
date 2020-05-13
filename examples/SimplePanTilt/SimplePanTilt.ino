@@ -24,7 +24,6 @@ Servo servo_10;
 void setup()
 {
   ss.begin();
-  //ss.enableUVC(true);
 
   servo_9.attach(9);
   servo_10.attach(10);
@@ -42,20 +41,14 @@ void loop()
     int dy = y - 50;
 
     if (dx < ss.getWidth()/-2) {
-      if (servo_10.read() < 90)
-        servo_9.write(servo_9.read() - map(dx, 0, -50, 0, 6));
-      else
-        servo_9.write(servo_9.read() + map(dx, 0, -50, 0, 6));
+      servo_9.write(servo_9.read() + map(dx, 0, -50, 0, 4)); // turn left
     } else if (dx > ss.getWidth()/2) {
-      if (servo_10.read() < 90)
-        servo_9.write(servo_9.read() + map(dx, 0, 50, 0, 6));
-      else
-        servo_9.write(servo_9.read() - map(dx, 0, 50, 0, 6));
+      servo_9.write(servo_9.read() - map(dx, 0, 50, 0, 4)); // turn right
     }
     if (dy < ss.getHeight()/-2) {
-      servo_10.write(servo_10.read() - map(dy, -10, -50, 0, 4)); // turn up
+      servo_10.write(servo_10.read() - map(dy, -10, -50, 0, 3)); // turn up
     } else if (dy > ss.getHeight()/2) {
-      servo_10.write(servo_10.read() + map(dy, 10, 50, 0, 4)); // turn down
+      servo_10.write(servo_10.read() + map(dy, 10, 50, 0, 3)); // turn down
     }
   }
   delay(20);
