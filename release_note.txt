@@ -18,4 +18,14 @@ Changelog
 2020-04-30  Release v1.0.5
  * Add EnableUVC() function to support UVC mode. 
    For the case of using Pixetto's USB and grove port simultaneously, it should switch to UVC mode.
- * Add numObjects() function to return number of detected objects.  
+ * Add numObjects() function to return number of detected objects. 
+
+ * Fix a bug that SmartSensor doesn't work any more after uploading arduino program.
+   The root cause is that if SmartSensor is detecting objects while uploading arduino program,
+   there are too many detected data transfered through serial which may break STREAMON hand-shaking.  
+   Solution: Send STREAMOFF to close SmartSensor's camera, to stop sensor from sending any data.
+   and then clear the serial buffer before sending STREAMON to open camera.
+   
+2020-05-11  Release v1.0.6
+ * Provide a simple example for PanTilt (SimplePanTilt).
+ * Simplify the codes of the example ObjectTrackingWithPanTilt.

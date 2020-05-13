@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.5
+#define SMARTSENSOR_VERSION 1.0.6
 
 
 class SmartSensor
