@@ -62,15 +62,12 @@ private:
 #define PXT_PACKET_END   	0xFE
 
 #define PXT_CMD_STREAMON	0x79
+#define PXT_CMD_STREAMOFF	0x7A
 
 #define PXT_RET_CAM_SUCCESS	0xE0
 #define PXT_RET_CAM_ERROR	0xE1
 
 #define PXT_RET_OBJNUM		0x46 //70
-
-//#define SENSOR_CMD_STREAMON  "{\"header\":\"STREAMON\"};"
-//#define SENSOR_CMD_QUERY	 "{\"header\":\"QUERY\"};"
-const uint8_t SENSOR_CMD_STREAMON[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMON, 0, PXT_PACKET_END};
 
 #define MAX_OPENCAM_ERROR   7
 #define MAX_JSON_ERROR   	30
@@ -132,7 +129,7 @@ bool InnerSensor<SerType>::openCam()
 	
 	if (!hasDelayed)
 	{
-		delay(5000); // depends on pixetto start-up time
+		delay(2000);		
 		hasDelayed = true;
 	}
 	else
@@ -142,8 +139,13 @@ bool InnerSensor<SerType>::openCam()
 	// do not send streamon command again.
 	if (!bSendStreamOn)
 	{
+		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
+		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
+		delay(2000);
 		serialFlush();
-		swSerial->write(SENSOR_CMD_STREAMON, sizeof(SENSOR_CMD_STREAMON)/sizeof(uint8_t));
+
+		SENSOR_CMD[2] =  PXT_CMD_STREAMON;
+		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 	
 #ifdef DEBUG_LOG
 		Serial.println("send: STREAMON");
