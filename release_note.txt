@@ -29,3 +29,9 @@ Changelog
 2020-05-11  Release v1.0.6
  * Provide a simple example for PanTilt (SimplePanTilt).
  * Simplify the codes of the example ObjectTrackingWithPanTilt.
+ 
+2020-06-09	Release v1.0.7
+ * Support LaneDetection HEX format - return 5 points
+     getPosX : X-coordinate of the center point
+     getPosY : Y-coordinate of the center point
+     getLanePoints : first 2 points for left line, and last 2 points for right line.
