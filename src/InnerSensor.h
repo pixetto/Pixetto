@@ -34,6 +34,7 @@ public:
 	int getH();
 	int getW();
 	int numObjects();
+	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
 	
 private:
 	void serialFlush();
@@ -56,6 +57,7 @@ private:
 	int m_h;
 	int m_w;
 	int m_objnum;
+	int m_points[8];
 };
 
 #define PXT_PACKET_START 	0xFD
@@ -68,6 +70,9 @@ private:
 #define PXT_RET_CAM_ERROR	0xE1
 
 #define PXT_RET_OBJNUM		0x46 //70
+#define PXT_FUNCID_LANES	16
+
+#define PXT_BUF_SIZE		15
 
 #define MAX_OPENCAM_ERROR   7
 #define MAX_JSON_ERROR   	30
@@ -82,6 +87,8 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	nJsonErrCount(0), nOpenCamFailCount(0), bEnableUVC(false), nTime4ObjNum(0)
 {
 	swSerial = p;
+	for (int i=0; i<8; i++)
+		m_points[i]=0;
 }
 
 template <class SerType>
@@ -240,7 +247,7 @@ bool InnerSensor<SerType>::verifyChecksum(uint8_t *buf, int len)
 	if (sum == PXT_PACKET_START || sum == PXT_PACKET_END)
 		sum = 0xAA;
 	
-	return (sum == buf[8]);
+	return (sum == buf[len-2]);
 }
 
 
@@ -266,7 +273,7 @@ bool InnerSensor<SerType>::isDetected()
 
 	if (swSerial->available() > 0)
 	{
-		uint8_t buffer[10];
+		uint8_t buffer[PXT_BUF_SIZE] = {0};
 		uint8_t input;
 		int i=0;
 		int nodata=0;
@@ -281,7 +288,7 @@ bool InnerSensor<SerType>::isDetected()
 		
 		while ((input = swSerial->read()) != PXT_PACKET_END)
 		{
-			if (i >= 10)
+			if (i >= PXT_BUF_SIZE)
 				break;
 
 			if (input == 0xFF) // no data
@@ -301,53 +308,64 @@ bool InnerSensor<SerType>::isDetected()
 			nodata = 0;
 		}
 		
-		if (i == 9) 
+		if (i == 9 || i == 14) 
 		{
 			buffer[i] = input;
 	
 #ifdef DEBUG_LOG
 			Serial.print("recv: ");
-			for (int j=0; j<10; j++)
+			for (int j=0; j<PXT_BUF_SIZE; j++)
 			{
 				Serial.print(buffer[j], HEX);
 				Serial.print(" ");
 			}
+			Serial.println(" ");
 #endif		
-		    correct = verifyChecksum(buffer, 10);
+		    correct = verifyChecksum(buffer, buffer[1]);
 			if (correct)
 			{
 				nJsonErrCount = 0;
 				
 				m_id = buffer[2];
-				m_type = buffer[3];
-
-				if (m_id <= 0 || m_type < 0)
+				
+				if (m_id == PXT_FUNCID_LANES)
 				{
+					m_x = buffer[3];
+					m_y = buffer[4];
+					for (int aa=0; aa<8; aa++)
+						m_points[aa] = buffer[aa+5];
+				}
+				else
+				{
+					m_type = buffer[3];
+	
+					if (m_id <= 0 || m_type < 0)
+					{
 #ifdef DEBUG_LOG
-					Serial.println("  incorrect values!!");
+						Serial.println("  incorrect values!!");
 #endif
-					return false;
-				}
-
-
-   				if (m_id == PXT_RET_OBJNUM) {
-   					if (m_type > 0) { 
-   					    m_objnum  = m_type;
-   					    nTime4ObjNum = millis();
-   					}
-   					//else if (m_type == 0 && (millis() - nTime4ObjNum) > 1000) {
-					//	m_objnum  = m_type;
-					//}
-					return isDetected();
-				}
+						return false;
+					}
+	
+	
+	   				if (m_id == PXT_RET_OBJNUM) {
+	   					if (m_type > 0) { 
+	   					    m_objnum  = m_type;
+	   					    nTime4ObjNum = millis();
+	   					}
+	   					//else if (m_type == 0 && (millis() - nTime4ObjNum) > 1000) {
+						//	m_objnum  = m_type;
+						//}
+						return isDetected();
+					}
+					m_x = buffer[4];
+					m_y = buffer[5];
+					m_w = buffer[6];
+					m_h = buffer[7];
+				}	
 #ifdef DEBUG_LOG
 				Serial.println("  OK!! ");
 #endif				
-				m_x = buffer[4];
-				m_y = buffer[5];
-				m_w = buffer[6];
-				m_h = buffer[7];
-		
 				return true;
 			}
 			else // validate checksum failed
@@ -433,4 +451,19 @@ int InnerSensor<SerType>::numObjects()
 	return m_objnum;    
 }
 
+template <class SerType>
+void InnerSensor<SerType>::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
+{
+	if (!lx1 || !ly1 || !lx2 || !ly2 || !rx1 || !ry1 || !rx2 || !ry2)
+		return;
+		
+	*lx1 = m_points[0];
+	*ly1 = m_points[1];
+	*lx2 = m_points[2];
+	*ly2 = m_points[3];
+	*rx1 = m_points[4];
+	*ry1 = m_points[5];
+	*rx2 = m_points[6];
+	*ry2 = m_points[7];
+}
 #endif

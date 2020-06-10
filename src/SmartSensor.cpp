@@ -122,3 +122,8 @@ int SmartSensor::numObjects()
 {
 	SS_FUNC(m_flag, numObjects)
 }
+
+void SmartSensor::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
+{
+	SS_FUNC(m_flag, getLanePoints, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2)
+}

@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.6
+#define SMARTSENSOR_VERSION 1.0.7
 
 
 class SmartSensor
@@ -34,13 +34,21 @@ public:
 	bool isDetected();  // Is object detected?
 	int getFuncID();    // ID of the detected object
 	int getTypeID();    // Type ID (color or shape or...) of the detected object
+	
 	int getPosX();      // x-coordinate of the upper-left corner of the detected bject
+						// For FUNC_LANES_DETECTION case, it's x-coordinate of the center point
 	int getPosY();      // y-coordinate of the upper-left corner of the detected object
+						// In FUNC_LANES_DETECTION case, it's y-coordinate of the center point
+						
 	int getH();         // the height of the detected object
 	int getW();         // the width of the detected object
 	int getHeight();    // the height of the detected object
 	int getWidth();     // the width of the detected object
 	int	numObjects();	// the number of detected objects
+	
+	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
+						// lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
+						// rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
 	
 	enum EFunc
 	{
@@ -51,10 +59,13 @@ public:
 		FUNC_TEMPLATE_MATCHING		= 6,
 		FUNC_KEYPOINTS				= 8,
 		FUNC_NEURAL_NETWORK			= 9,
+		FUNC_APRILTAG				= 10,
 		FUNC_FACE_DETECTION			= 11,
 		FUNC_TRAFFIC_SIGN_DETECTION	= 12,
 		FUNC_HANDWRITTEN_DIGITS_DETECTION	= 13,
-		FUNC_HANDWRITTEN_LETTERS_DETECTION	= 14
+		FUNC_HANDWRITTEN_LETTERS_DETECTION	= 14,
+		FUNC_CLOUD_DETECTION	= 15,
+		FUNC_LANES_DETECTION	= 16,
 	};
 	
 	enum EColor
