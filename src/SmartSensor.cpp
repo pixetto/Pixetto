@@ -1,14 +1,14 @@
 /*
  * Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
  *
- * This PROPRIETARY SOFTWARE is the property of WonderMedia Technologies, Inc.
+ * This PROPRIETARY SOFTWARE is the property of VIA Technologies, Inc.
  * and may contain trade secrets and/or other confidential information of
- * WonderMedia Technologies, Inc. This file shall not be disclosed to any third
- * party, in whole or in part, without prior written consent of WonderMedia.
+ * VIA Technologies, Inc. This file shall not be disclosed to any third
+ * party, in whole or in part, without prior written consent of VIA.
  *
  * THIS PROPRIETARY SOFTWARE AND ANY RELATED DOCUMENTATION ARE PROVIDED AS IS,
  * WITH ALL FAULTS, AND WITHOUT WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED,
- * AND WonderMedia TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
+ * AND VIA TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
  * ENJOYMENT OR NON-INFRINGEMENT.
 */
@@ -126,4 +126,14 @@ int SmartSensor::numObjects()
 void SmartSensor::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
 {
 	SS_FUNC(m_flag, getLanePoints, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2)
+}
+
+void SmartSensor::getEquationExpr(char *buf, int len)
+{
+	SS_FUNC(m_flag, getEquationExpr, buf, len)
+}
+
+float SmartSensor::getEquationAnswer()
+{
+	SS_FUNC(m_flag, getEquationAnswer)
 }

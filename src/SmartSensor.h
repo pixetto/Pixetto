@@ -1,14 +1,14 @@
 /*
 * Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
 *
-* This PROPRIETARY SOFTWARE is the property of WonderMedia Technologies, Inc.
+* This PROPRIETARY SOFTWARE is the property of VIA Technologies, Inc.
 * and may contain trade secrets and/or other confidential information of
-* WonderMedia Technologies, Inc. This file shall not be disclosed to any third
-* party, in whole or in part, without prior written consent of WonderMedia.
+* VIA Technologies, Inc. This file shall not be disclosed to any third
+* party, in whole or in part, without prior written consent of VIA.
 *
 * THIS PROPRIETARY SOFTWARE AND ANY RELATED DOCUMENTATION ARE PROVIDED AS IS,
 * WITH ALL FAULTS, AND WITHOUT WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED,
-* AND WonderMedia TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
+* AND VIA TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
 * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 * ENJOYMENT OR NON-INFRINGEMENT.
 */
@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.7
+#define SMARTSENSOR_VERSION 1.0.8
 
 
 class SmartSensor
@@ -49,6 +49,10 @@ public:
 	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
 						// lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
 						// rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
+
+	// For Equation detection, it always returns the first one detected equation.						
+	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
+	float getEquationAnswer();					// the answer of the equation
 	
 	enum EFunc
 	{
@@ -64,8 +68,9 @@ public:
 		FUNC_TRAFFIC_SIGN_DETECTION	= 12,
 		FUNC_HANDWRITTEN_DIGITS_DETECTION	= 13,
 		FUNC_HANDWRITTEN_LETTERS_DETECTION	= 14,
-		FUNC_CLOUD_DETECTION	= 15,
-		FUNC_LANES_DETECTION	= 16,
+		FUNC_CLOUD_DETECTION		= 15,
+		FUNC_LANES_DETECTION		= 16,
+		FUNC_EQUATION_DETECTION		= 17,
 	};
 	
 	enum EColor
