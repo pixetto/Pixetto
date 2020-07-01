@@ -26,17 +26,61 @@
 SmartSensor::SmartSensor(int rx, int tx)
 	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
 {
+	// https://www.arduino.cc/reference/en/language/functions/communication/serial/
+
+#if defined(HAVE_HWSERIAL0) && defined(HAVE_HWSERIAL1) && defined(HAVE_HWSERIAL2) && defined(HAVE_HWSERIAL3)
+	// Mega, Due
 	if (rx == 0 && tx == 1)
 	{
 		m_flag = true;
 		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
+		return;
 	}
-	else
+	if (rx == 19 && tx == 18)
 	{
-		m_flag = false;
-		swSer = new SoftwareSerial(rx,tx);
-		ss_sw = new InnerSensor<SoftwareSerial>(swSer);
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
+		return;
 	}
+	if (rx == 17 && tx == 16)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial2);
+		return;
+	}
+	if (rx == 15 && tx == 14)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial3);
+		return;
+	}
+#elif defined(HAVE_HWSERIAL1)
+	// Leonardo, Microm Yun, MKR, Zero, 101
+	if (rx == 0 && tx == 1)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
+		return;
+	}
+	if (rx == 13 && tx == 14)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
+		return;
+	}
+#elif defined(HAVE_HWSERIAL0)
+	// Uno, Nano, Mini
+	if (rx == 0 && tx == 1)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
+		return;
+	}
+#endif
+
+	m_flag = false;
+	swSer = new SoftwareSerial(rx,tx);
+	ss_sw = new InnerSensor<SoftwareSerial>(swSer);
 }
 
 SmartSensor::~SmartSensor()
