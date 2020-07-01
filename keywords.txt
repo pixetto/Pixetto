@@ -12,3 +12,5 @@ getHeight	KEYWORD2
 getWidth	KEYWORD2
 numObjects	KEYWORD2
 getLanePoints KEYWORD2
+getEquationExpr		KEYWORD2
+getEquationAnswer	KEYWORD2

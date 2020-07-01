@@ -35,3 +35,6 @@ Changelog
      getPosX : X-coordinate of the center point
      getPosY : Y-coordinate of the center point
      getLanePoints : first 2 points for left line, and last 2 points for right line.
+     
+2020-06-24	Release v1.0.8
+ * Support Equation Detection, add two functions: getEquationExpr and getEquationAnswer  
