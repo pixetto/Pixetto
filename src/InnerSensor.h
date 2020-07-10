@@ -85,7 +85,7 @@ private:
 #define MAX_OPENCAM_ERROR   7
 #define MAX_JSON_ERROR   	30
 
-#define DEBUG_LOG
+//#define DEBUG_LOG
 
 template <class SerType>
 InnerSensor<SerType>::InnerSensor(SerType* p)

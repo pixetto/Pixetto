@@ -36,5 +36,9 @@ Changelog
      getPosY : Y-coordinate of the center point
      getLanePoints : first 2 points for left line, and last 2 points for right line.
      
-2020-06-24	Release v1.0.8
- * Support Equation Detection, add two functions: getEquationExpr and getEquationAnswer  
+2020-07-01	Release v1.0.8
+ * Support Equation Detection, add two functions: getEquationExpr and getEquationAnswer
+ * Support all arduino boards' HardwareSerial.
+ 
+2020-07-08	Release v1.0.9
+ * Remove internal debug message.
