@@ -80,7 +80,7 @@ private:
 #define PXT_FUNCID_LANES	16
 #define PXT_FUNCID_EQUATION	17
 
-#define PXT_BUF_SIZE		28
+#define PXT_BUF_SIZE		33
 
 #define MAX_OPENCAM_ERROR   7
 #define MAX_JSON_ERROR   	30
@@ -99,7 +99,7 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	for (int i=0; i<8; i++)
 		m_points[i]=0;
 		
-	memset(m_eqExpr, 0, 17);
+	memset(m_eqExpr, 0, sizeof(m_eqExpr));
 }
 
 template <class SerType>
@@ -257,7 +257,7 @@ bool InnerSensor<SerType>::verifyChecksum(uint8_t *buf, int len)
 	
 	sum %= 256;
 	
-	if (sum == PXT_PACKET_START || sum == PXT_PACKET_END)
+	if (sum == PXT_PACKET_START || sum == PXT_PACKET_END || sum == 0xFF)
 		sum = 0xAA;
 	
 	return (sum == buf[len-2]);
@@ -280,10 +280,17 @@ void InnerSensor<SerType>::parse_Equation(uint8_t *buf, int len)
 	m_w = buf[5];
 	m_h = buf[6];
 	
-	m_eqAnswer = buf[7]*256 + buf[8] + (float)buf[9]/100.0;
-	m_eqLen = len - 12;
+	m_eqAnswer = 0;
+	for (int i=8; i<=14; i++) 
+		m_eqAnswer = m_eqAnswer * 10 + buf[i];
+
+	m_eqAnswer /= 100;
+	if (buf[7] == 0) m_eqAnswer = 0 - m_eqAnswer;	
+	
+	memset(m_eqExpr, 0, sizeof(m_eqExpr));
+	m_eqLen = len - 17;
 	for (int aa=0; aa<m_eqLen; aa++)
-		m_eqExpr[aa] = (char)buf[aa+10];	
+		m_eqExpr[aa] = (char)buf[aa+15];
 }
 
 
@@ -344,7 +351,7 @@ bool InnerSensor<SerType>::isDetected()
 			nodata = 0;
 		}
 		
-		if (buffer[1] <= 28) // Length <= 28 
+		if (buffer[1] <= PXT_BUF_SIZE) // Length <= PXT_BUF_SIZE 
 		{
 			buffer[i] = input;
 	
