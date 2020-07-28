@@ -42,3 +42,9 @@ Changelog
  
 2020-07-08	Release v1.0.9
  * Remove internal debug message.
+ 
+2020-07-28	Release v1.0.10
+ * Modify arduino protocal format for Equation Detection.
+   Use "xxxxx.xx" string format to represent the answer, instead of hex format,
+   to avoid conflict with the header value 253(0xFD), 254(0xFE), 255(0xFF).
+ 
