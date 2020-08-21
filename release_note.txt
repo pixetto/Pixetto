@@ -47,4 +47,7 @@ Changelog
  * Modify arduino protocal format for Equation Detection.
    Use "xxxxx.xx" string format to represent the answer, instead of hex format,
    to avoid conflict with the header value 253(0xFD), 254(0xFE), 255(0xFF).
- 
+
+2020-08-21	Release v1.0.11
+ * Support Apriltag detection - Add getApriltagInfo function.
+ * Modify the implementation of receiving data from serial. Use readBytes instead of read.
