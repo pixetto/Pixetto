@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.10
+#define SMARTSENSOR_VERSION 1.0.11
 
 
 class SmartSensor
@@ -46,6 +46,7 @@ public:
 	int getWidth();     // the width of the detected object
 	int	numObjects();	// the number of detected objects
 	
+	// For Lanes detection
 	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
 						// lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
 						// rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
@@ -54,6 +55,12 @@ public:
 	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
 	float getEquationAnswer();					// the answer of the equation
 	
+	// For Apriltag
+	void getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy);
+						// px,py,pz : distance to center on each x,y,z axis 
+						// rx,ry,rz : rotation angle on each x,y,z axis
+						// cx,cy    : coordinate of apriltag's center point
+						
 	enum EFunc
 	{
 		FUNC_COLOR_DETECTION		= 1,

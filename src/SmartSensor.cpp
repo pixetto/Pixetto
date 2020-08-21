@@ -181,3 +181,9 @@ float SmartSensor::getEquationAnswer()
 {
 	SS_FUNC(m_flag, getEquationAnswer)
 }
+
+
+void SmartSensor::getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy)
+{
+	SS_FUNC(m_flag, getApriltagInfo, px, py, pz, rx, ry, rz, cx, cy)
+}
