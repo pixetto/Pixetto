@@ -113,7 +113,8 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	m_x(0), m_y(0), m_h(0), m_w(0), m_eqAnswer(0), m_eqLen(0),
 	isCamOpened(false), hasDelayed(false), bSendStreamOn(false),
 	nHexErrCount(0), nOpenCamFailCount(0), bEnableUVC(false), nTime4ObjNum(0),
-	m_dataLen(0), m_posx(0.0), m_posy(0.0), m_posz(0.0), m_rotx(0), m_roty(0), m_rotz(0),
+	m_dataLen(0), 
+	m_posx(0.0), m_posy(0.0), m_posz(0.0), m_rotx(0), m_roty(0), m_rotz(0),
 	m_centerx(0), m_centery(0)
 {
 	swSerial = p;
@@ -417,7 +418,7 @@ bool InnerSensor<SerType>::readFromSerial()
 			i++;
 		}
 	}
-    //Serial.println("Find nothing!!");
+    //Serial.println("Nothing found!!");
     nHexErrCount++;
 	return false;
 }
