@@ -18,7 +18,7 @@
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.0.12
+#define SMARTSENSOR_VERSION 1.3.0
 
 
 class SmartSensor
@@ -78,6 +78,8 @@ public:
 		FUNC_CLOUD_DETECTION		= 15,
 		FUNC_LANES_DETECTION		= 16,
 		FUNC_EQUATION_DETECTION		= 17,
+		FUNC_SIMPLE_CLASSIFIER		= 18,
+		FUNC_VOICE_COMMAND			= 19
 	};
 	
 	enum EColor
@@ -148,6 +150,36 @@ public:
 		LETTER_Z
 	};
 
+	enum EVoiceCommand
+	{
+		VOICE_Hello = 1,	// 你好
+		VOICE_Thanks,       // 謝謝
+		VOICE_Bye,			// 再見
+		VOICE_WhatsThis,	// 這是甚麼
+		VOICE_WhatTime,		// 現在幾點
+		VOICE_HowOld,		// 我幾歲
+		VOICE_WhatDay,		// 今天星期幾
+		VOICE_TellStory,	// 講故事
+		VOICE_TellJoke,		// 說笑話
+		VOICE_ReadPoem,		// 念唐詩
+		VOICE_TurnOnLight,	// 開燈
+		VOICE_TurnOffLight,	// 關燈
+		VOICE_TurnLeft,		// 左轉
+		VOICE_TurnRight,	// 右轉
+		VOICE_GoAhead,		// 前進
+		VOICE_MoveBack,		// 後退
+		VOICE_Stop,			// 停止
+		VOICE_Open,			// 開啟
+		VOICE_Close,		// 關閉
+		VOICE_OpenEyes1,	// 睜開眼睛
+		VOICE_OpenEyes2,	// 睜眼
+		VOICE_CloseEyes1,	// 閉上眼睛
+		VOICE_CloseEyes2,	// 閉眼
+		VOICE_Jump,			// 跳一下
+		VOICE_StandUp,		// 起立
+		VOICE_SquatDown		// 蹲下		
+	};
+	
 private:
 	SoftwareSerial *swSer;
 	InnerSensor<HardwareSerial> *ss_hw;

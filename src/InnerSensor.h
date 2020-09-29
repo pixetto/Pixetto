@@ -148,6 +148,7 @@ template <class SerType>
 void InnerSensor<SerType>::begin()
 {                            
 	swSerial->begin(38400);
+	swSerial->setTimeout(50);
 	hasDelayed = false;
 	isCamOpened = false;
 	bSendStreamOn = false;
@@ -382,7 +383,7 @@ bool InnerSensor<SerType>::readFromSerial()
 			nHexErrCount++;
 			return false;
 		}
-           
+
 		memset(m_inbuf, 0, sizeof(m_inbuf));
 		memcpy(m_inbuf, tmpbuf+i, len);		
 		if (verifyDataChecksum(m_inbuf, len))
