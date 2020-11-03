@@ -13,10 +13,10 @@
  * ENJOYMENT OR NON-INFRINGEMENT.
 */
 
-#include <SmartSensor.h>
+#include <Pixetto.h>
 #include <Servo.h>
 
-SmartSensor ss(0, 1);
+Pixetto ss(0, 1);
 
 Servo servo_9;
 Servo servo_10;

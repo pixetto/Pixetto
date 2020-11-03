@@ -195,7 +195,7 @@ bool InnerSensor<SerType>::openCam()
 	}
 
 	if (swSerial->available() > 0)
-	{
+	{                              
 		bSendStreamOn = false; // After receiving any response, reset the flag
 	
 		uint8_t buffer[10];
@@ -207,7 +207,7 @@ bool InnerSensor<SerType>::openCam()
 		{
 			if (input == 0xFF) // no data
 				return false;
-
+                                              
 			continue;
 		}
 
@@ -257,7 +257,7 @@ bool InnerSensor<SerType>::openCam()
 		}
 	}
 	else
-	{
+	{      
 		nOpenCamFailCount++;
 		if (nOpenCamFailCount > MAX_OPENCAM_ERROR)
 		{
@@ -488,6 +488,7 @@ bool InnerSensor<SerType>::isDetected()
 			m_w = m_inbuf[6];
 			m_h = m_inbuf[7];
 		}	
+
 #ifdef DEBUG_LOG
 		Serial.println("  OK!! ");
 #endif				

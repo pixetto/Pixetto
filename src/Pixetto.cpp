@@ -14,7 +14,7 @@
 */
 
 #include <Arduino.h>
-#include <SmartSensor.h>
+#include <Pixetto.h>
 
 #define SS_FUNC(f, func, ...) \
 	if (f == true) \
@@ -23,7 +23,7 @@
 		return ss_sw->func(__VA_ARGS__);
 
 
-SmartSensor::SmartSensor(int rx, int tx)
+Pixetto::Pixetto(int rx, int tx)
 	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
 {
 	// https://www.arduino.cc/reference/en/language/functions/communication/serial/
@@ -83,7 +83,7 @@ SmartSensor::SmartSensor(int rx, int tx)
 	ss_sw = new InnerSensor<SoftwareSerial>(swSer);
 }
 
-SmartSensor::~SmartSensor()
+Pixetto::~Pixetto()
 {
 	if (ss_hw)
 	{
@@ -102,88 +102,88 @@ SmartSensor::~SmartSensor()
 	}
 }
 
-void SmartSensor::enableUVC(bool uvc)
+void Pixetto::enableUVC(bool uvc)
 {
 	SS_FUNC(m_flag, enableUVC, uvc)
 }
 
-void SmartSensor::begin()
+void Pixetto::begin()
 {
 	SS_FUNC(m_flag, begin)
 }
 
-void SmartSensor::end()
+void Pixetto::end()
 {
 	SS_FUNC(m_flag, end)
 }
 
-bool SmartSensor::isDetected()
+bool Pixetto::isDetected()
 {
 	SS_FUNC(m_flag, isDetected)
 }
 
-int SmartSensor::getFuncID()
+int Pixetto::getFuncID()
 {
 	SS_FUNC(m_flag, getFuncID)
 }
 
-int SmartSensor::getTypeID()
+int Pixetto::getTypeID()
 {
 	SS_FUNC(m_flag, getTypeID)
 }
 
-int SmartSensor::getPosX()
+int Pixetto::getPosX()
 {
 	SS_FUNC(m_flag, getPosX)
 }
 
-int SmartSensor::getPosY()
+int Pixetto::getPosY()
 {
 	SS_FUNC(m_flag, getPosY)
 }
 
-int SmartSensor::getH()
+int Pixetto::getH()
 {
 	SS_FUNC(m_flag, getH)
 }
 
-int SmartSensor::getW()
+int Pixetto::getW()
 {
 	SS_FUNC(m_flag, getW)
 }
 
-int SmartSensor::getHeight()
+int Pixetto::getHeight()
 {
 	SS_FUNC(m_flag, getH)
 }
 
-int SmartSensor::getWidth()
+int Pixetto::getWidth()
 {
 	SS_FUNC(m_flag, getW)
 }
 
-int SmartSensor::numObjects()
+int Pixetto::numObjects()
 {
 	SS_FUNC(m_flag, numObjects)
 }
 
-void SmartSensor::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
+void Pixetto::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
 {
 	SS_FUNC(m_flag, getLanePoints, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2)
 }
 
-void SmartSensor::getEquationExpr(char *buf, int len)
+void Pixetto::getEquationExpr(char *buf, int len)
 {
 	SS_FUNC(m_flag, getEquationExpr, buf, len)
 }
 
-float SmartSensor::getEquationAnswer()
+float Pixetto::getEquationAnswer()
 {
 	SS_FUNC(m_flag, getEquationAnswer)
 }
 
 
-void SmartSensor::getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy)
+void Pixetto::getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy)
 {
 	SS_FUNC(m_flag, getApriltagInfo, px, py, pz, rx, ry, rz, cx, cy)
 }

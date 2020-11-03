@@ -1,4 +1,4 @@
-SmartSensor	KEYWORD1
+Pixetto		KEYWORD1
 
 enableUVC	KEYWORD2
 begin		KEYWORD2

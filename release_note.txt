@@ -1,4 +1,4 @@
-Arduino libraries for vts8787 (Pixetto)
+Arduino libraries for VIA Pixetto Vision Sensor
 
 Copyright (C) 2020  VIA Technologies, Inc. All rights reserved.
 
@@ -59,3 +59,8 @@ Changelog
 2020-09-29	Release v1.3.0
  * Support voice commands function. (EVoiceCommand)
  * Add VoiceCommand example.
+
+2020-11-03	Release v1.4.0
+ * Rename the library to Pixetto.
+ * Rename the class name to Pixetto.
+ * Rename the file names to Pixetto.h/Pixetto.cpp.

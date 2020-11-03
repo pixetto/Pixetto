@@ -12,24 +12,24 @@
 * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 * ENJOYMENT OR NON-INFRINGEMENT.
 */
-#ifndef SmartSensor_h
-#define SmartSensor_h
+#ifndef Pixetto_h
+#define Pixetto_h
 
 #include <InnerSensor.h>
 #include <SoftwareSerial.h>
 
-#define SMARTSENSOR_VERSION 1.3.0
+#define PIXETTO_VERSION 1.4.0
 
 
-class SmartSensor
+class Pixetto
 {
 public:
-	SmartSensor(int rx, int tx);
-	~SmartSensor();
+	Pixetto(int rx, int tx);
+	~Pixetto();
 	
 	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
-	void begin();		// Initialize the SmartSensor
-	void end();         // Uninitialize the SmartSensor
+	void begin();		// Initialize the Pixetto
+	void end();         // Uninitialize the Pixetto
 	
 	bool isDetected();  // Is object detected?
 	int getFuncID();    // ID of the detected object
