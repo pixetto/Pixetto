@@ -48,6 +48,7 @@ public:
 	void enableUVC(bool uvc);
 	void begin();
 	void end();
+	void flush();
 	
 	bool isDetected();
 	int getFuncID();
@@ -63,7 +64,6 @@ public:
 	void getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy);
 	
 private:
-	void serialFlush();
 	bool openCam();
 	bool readFromSerial();
 	bool verifyDataChecksum(uint8_t *buf, int len);
@@ -132,7 +132,7 @@ InnerSensor<SerType>::~InnerSensor()
 }
 
 template <class SerType>
-void InnerSensor<SerType>::serialFlush()
+void InnerSensor<SerType>::flush()
 {
 	while (swSerial->available() > 0)
 		char t = swSerial->read();
@@ -183,7 +183,7 @@ bool InnerSensor<SerType>::openCam()
 		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 		delay(2000);
-		serialFlush();
+		flush();
 
 		SENSOR_CMD[2] =  PXT_CMD_STREAMON;
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
@@ -517,7 +517,7 @@ bool InnerSensor<SerType>::isDetected()
 			Serial.println("send reset");
 #endif
 			delay(50);
-			serialFlush();
+			flush();
 			this->end();
 			delay(50);
 			

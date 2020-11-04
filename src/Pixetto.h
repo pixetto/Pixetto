@@ -30,6 +30,7 @@ public:
 	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
 	void begin();		// Initialize the Pixetto
 	void end();         // Uninitialize the Pixetto
+	void flush();		// Clear the serial buffer.
 	
 	bool isDetected();  // Is object detected?
 	int getFuncID();    // ID of the detected object

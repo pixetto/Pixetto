@@ -117,6 +117,11 @@ void Pixetto::end()
 	SS_FUNC(m_flag, end)
 }
 
+void Pixetto::flush()
+{
+	SS_FUNC(m_flag, flush)
+}
+
 bool Pixetto::isDetected()
 {
 	SS_FUNC(m_flag, isDetected)

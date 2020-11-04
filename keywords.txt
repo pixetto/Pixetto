@@ -11,6 +11,7 @@ Pixetto		KEYWORD1
 enableUVC	KEYWORD2
 begin		KEYWORD2
 end			KEYWORD2
+flush		KEYWORD2
 isDetected	KEYWORD2
 getFuncID	KEYWORD2
 getTypeID	KEYWORD2
