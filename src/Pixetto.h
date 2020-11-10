@@ -32,22 +32,24 @@ public:
 	void end();         // Uninitialize the Pixetto
 	void flush();		// Clear the serial buffer.
 	
-	bool isDetected();  // Is object detected?
+	bool isDetected();  // Is there any object detected?
 	int getFuncID();    // ID of the detected object
 	int getTypeID();    // Type ID (color or shape or...) of the detected object
 	
-	int getPosX();      // x-coordinate of the upper-left corner of the detected bject
-						// For FUNC_LANES_DETECTION case, it's x-coordinate of the center point
-	int getPosY();      // y-coordinate of the upper-left corner of the detected object
+	int getPosX();      // x-coordinate of the upper-left corner of the detected object (range:0~100)
+						// In FUNC_LANES_DETECTION case, it's x-coordinate of the center point
+	int getPosY();      // y-coordinate of the upper-left corner of the detected object (range:0~100)
 						// In FUNC_LANES_DETECTION case, it's y-coordinate of the center point
 						
-	int getH();         // the height of the detected object
-	int getW();         // the width of the detected object
-	int getHeight();    // the height of the detected object
-	int getWidth();     // the width of the detected object
+	int getH();         // the height of the detected object (range:0~100)
+	int getW();         // the width of the detected object  (range:0~100)
+	int getHeight();    // the height of the detected object (range:0~100)
+	int getWidth();     // the width of the detected object  (range:0~100)
 	int	numObjects();	// the number of detected objects
 	
-	// For Lanes detection
+	// For Lanes detection, 
+	//   get center point : getPosX(), getPosY()
+	//   get 4 end points of left and right lines : getLanePoints()
 	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
 						// lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
 						// rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line

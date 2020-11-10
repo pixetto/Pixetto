@@ -29,6 +29,7 @@
 #define PXT_FUNCID_APRILTAG	10
 #define PXT_FUNCID_LANES	16
 #define PXT_FUNCID_EQUATION	17
+#define PXT_FUNCID_SIMCLASS	18
 
 #define PXT_BUF_SIZE		40
 
@@ -70,7 +71,8 @@ private:
 	void parse_Lanes(uint8_t *buf);
 	void parse_Equation(uint8_t *buf, int len);
 	void parse_Apriltag(uint8_t *buf);
-	
+	void parse_SimpleClassifier(uint8_t *buf);
+	                       	
 	bool isCamOpened;
 	bool bSendStreamOn;
 	bool hasDelayed;
@@ -339,6 +341,16 @@ void InnerSensor<SerType>::parse_Apriltag(uint8_t *buf)
 }
 
 template <class SerType>
+void InnerSensor<SerType>::parse_SimpleClassifier(uint8_t *buf) 
+{
+	m_type = buf[3] * 256 + buf[4];
+	m_x = buf[5];
+	m_y = buf[6];
+	m_w = buf[7];
+	m_h = buf[8];
+}
+
+template <class SerType>
 bool InnerSensor<SerType>::readFromSerial()
 {
 	uint8_t tmpbuf[PXT_BUF_SIZE];
@@ -469,6 +481,10 @@ bool InnerSensor<SerType>::isDetected()
 		{
 			parse_Apriltag(m_inbuf);
 		}
+		else if (m_id == PXT_FUNCID_SIMCLASS)
+		{
+			parse_SimpleClassifier(m_inbuf);
+		}
 		else
 		{
 			m_type = m_inbuf[3];
@@ -568,7 +584,8 @@ int InnerSensor<SerType>::getW()
 template <class SerType>
 int InnerSensor<SerType>::numObjects()
 {
-	if (m_id <= PXT_FUNCID_LANES && (millis() - nTime4ObjNum) > 1000)
+	//if (m_id <= PXT_FUNCID_LANES && 
+	if ((millis() - nTime4ObjNum) > 500)
 		m_objnum = 0;
 	return m_objnum;    
 }
