@@ -15,6 +15,7 @@
 #ifndef InnerSensor_h
 #define InnerSensor_h
 
+#include "Pixetto.h"
 
 #define PXT_PACKET_START 	0xFD
 #define PXT_PACKET_END   	0xFE
@@ -26,10 +27,6 @@
 #define PXT_RET_CAM_ERROR	0xE1
 
 #define PXT_RET_OBJNUM		0x46 //70
-#define PXT_FUNCID_APRILTAG	10
-#define PXT_FUNCID_LANES	16
-#define PXT_FUNCID_EQUATION	17
-#define PXT_FUNCID_SIMCLASS	18
 
 #define PXT_BUF_SIZE		40
 
@@ -38,13 +35,11 @@
 
 //#define DEBUG_LOG
 
-
 template <class SerType>
 class InnerSensor
 {
 public:
 	InnerSensor(SerType* p); // SoftwareSerial or HardwareSerial
-	~InnerSensor();
 	
 	void enableUVC(bool uvc);
 	void begin();
@@ -60,9 +55,11 @@ public:
 	int getW();
 	int numObjects();
 	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
+	float getLanesField(Pixetto::ELanesField field);
 	void getEquationExpr(char *buf, int len);
 	float getEquationAnswer();
 	void getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy);
+	float getApriltagField(Pixetto::EApriltagField field);
 	
 private:
 	bool openCam();
@@ -72,7 +69,7 @@ private:
 	void parse_Equation(uint8_t *buf, int len);
 	void parse_Apriltag(uint8_t *buf);
 	void parse_SimpleClassifier(uint8_t *buf);
-	                       	
+	                     
 	bool isCamOpened;
 	bool bSendStreamOn;
 	bool hasDelayed;
@@ -124,13 +121,6 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	memset(m_inbuf,  0, sizeof(m_inbuf));
 	memset(m_points, 0, sizeof(m_points));
 	memset(m_eqExpr, 0, sizeof(m_eqExpr));
-}
-
-template <class SerType>
-InnerSensor<SerType>::~InnerSensor()
-{
-	if (swSerial)
-		delete swSerial;
 }
 
 template <class SerType>
@@ -467,21 +457,21 @@ bool InnerSensor<SerType>::isDetected()
 			return false;
 		}
 				
-		if (m_id == PXT_FUNCID_LANES)
+		if (m_id == Pixetto::FUNC_LANES_DETECTION)
 		{
 			parse_Lanes(m_inbuf);
 			m_objnum = 1;
 		}
-		else if (m_id == PXT_FUNCID_EQUATION)
+		else if (m_id == Pixetto::FUNC_EQUATION_DETECTION)
 		{
 		 	parse_Equation(m_inbuf, m_dataLen);
 		 	m_objnum = 1;
 		}
-		else if (m_id == PXT_FUNCID_APRILTAG)
+		else if (m_id == Pixetto::FUNC_APRILTAG)
 		{
 			parse_Apriltag(m_inbuf);
 		}
-		else if (m_id == PXT_FUNCID_SIMCLASS)
+		else if (m_id == Pixetto::FUNC_SIMPLE_CLASSIFIER)
 		{
 			parse_SimpleClassifier(m_inbuf);
 		}
@@ -584,7 +574,7 @@ int InnerSensor<SerType>::getW()
 template <class SerType>
 int InnerSensor<SerType>::numObjects()
 {
-	//if (m_id <= PXT_FUNCID_LANES && 
+	//if (m_id <= Pixetto::FUNC_LANES_DETECTION && 
 	if ((millis() - nTime4ObjNum) > 500)
 		m_objnum = 0;
 	return m_objnum;    
@@ -635,5 +625,56 @@ void InnerSensor<SerType>::getApriltagInfo(float* px, float* py, float* pz, int*
 	*cy = m_centery;
 }
 
+template <class SerType>
+float InnerSensor<SerType>::getApriltagField(Pixetto::EApriltagField field)
+{
+	switch(field)
+	{
+		case Pixetto::APRILTAG_POS_X:
+			return m_posx;
+		case Pixetto::APRILTAG_POS_Y:
+			return m_posy;
+		case Pixetto::APRILTAG_POS_Z:
+			return m_posz;
+		case Pixetto::APRILTAG_ROT_X:
+			return m_rotx;
+		case Pixetto::APRILTAG_ROT_Y:
+			return m_roty;
+		case Pixetto::APRILTAG_ROT_Z:
+			return m_rotz;
+		case Pixetto::APRILTAG_CENTER_X:
+			return m_centerx;
+		case Pixetto::APRILTAG_CENTER_Y:
+			return m_centery;
+		default:
+			return 0;
+	}
+}
+
+template <class SerType>
+float InnerSensor<SerType>::getLanesField(Pixetto::ELanesField field)
+{
+	switch(field)
+	{
+		case Pixetto::LANES_LX1:
+			return m_points[0];
+		case Pixetto::LANES_LY1:
+			return m_points[1];
+		case Pixetto::LANES_LX2:
+			return m_points[2];
+		case Pixetto::LANES_LY2:
+			return m_points[3];
+		case Pixetto::LANES_RX1:
+			return m_points[4];
+		case Pixetto::LANES_RY1:
+			return m_points[5];
+		case Pixetto::LANES_RX2:
+			return m_points[6];
+		case Pixetto::LANES_RY2:
+			return m_points[7];
+		default:
+			return 0;
+	}
+}
 
 #endif

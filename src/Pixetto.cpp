@@ -14,7 +14,7 @@
 */
 
 #include <Arduino.h>
-#include <Pixetto.h>
+#include "InnerSensor.h"
 
 #define SS_FUNC(f, func, ...) \
 	if (f == true) \
@@ -81,25 +81,6 @@ Pixetto::Pixetto(int rx, int tx)
 	m_flag = false;
 	swSer = new SoftwareSerial(rx,tx);
 	ss_sw = new InnerSensor<SoftwareSerial>(swSer);
-}
-
-Pixetto::~Pixetto()
-{
-	if (ss_hw)
-	{
-		delete ss_hw;
-		ss_hw = 0;
-	}
-	if (ss_sw)
-	{
-		delete ss_sw;
-		ss_sw = 0;
-	}
-	if (swSer)
-	{
-		delete swSer;
-		swSer = 0;
-	}
 }
 
 void Pixetto::enableUVC(bool uvc)
@@ -191,4 +172,15 @@ float Pixetto::getEquationAnswer()
 void Pixetto::getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy)
 {
 	SS_FUNC(m_flag, getApriltagInfo, px, py, pz, rx, ry, rz, cx, cy)
+}
+
+
+float Pixetto::getApriltagField(Pixetto::EApriltagField field)
+{
+	SS_FUNC(m_flag, getApriltagField, field)
+}
+
+float Pixetto::getLanesField(Pixetto::ELanesField field)
+{
+	SS_FUNC(m_flag, getLanesField, field)
 }

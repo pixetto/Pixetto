@@ -15,55 +15,19 @@
 #ifndef Pixetto_h
 #define Pixetto_h
 
-#include <InnerSensor.h>
+#include <Arduino.h>
 #include <SoftwareSerial.h>
 
-#define PIXETTO_VERSION 1.4.0
+#define PIXETTO_VERSION 1.4.1
 
+template <class SerType>
+class InnerSensor;
 
 class Pixetto
 {
 public:
 	Pixetto(int rx, int tx);
-	~Pixetto();
 	
-	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
-	void begin();		// Initialize the Pixetto
-	void end();         // Uninitialize the Pixetto
-	void flush();		// Clear the serial buffer.
-	
-	bool isDetected();  // Is there any object detected?
-	int getFuncID();    // ID of the detected object
-	int getTypeID();    // Type ID (color or shape or...) of the detected object
-	
-	int getPosX();      // x-coordinate of the upper-left corner of the detected object (range:0~100)
-						// In FUNC_LANES_DETECTION case, it's x-coordinate of the center point
-	int getPosY();      // y-coordinate of the upper-left corner of the detected object (range:0~100)
-						// In FUNC_LANES_DETECTION case, it's y-coordinate of the center point
-						
-	int getH();         // the height of the detected object (range:0~100)
-	int getW();         // the width of the detected object  (range:0~100)
-	int getHeight();    // the height of the detected object (range:0~100)
-	int getWidth();     // the width of the detected object  (range:0~100)
-	int	numObjects();	// the number of detected objects
-	
-	// For Lanes detection, 
-	//   get center point : getPosX(), getPosY()
-	//   get 4 end points of left and right lines : getLanePoints()
-	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
-						// lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
-						// rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
-
-	// For Equation detection, it always returns the first one detected equation.						
-	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
-	float getEquationAnswer();					// the answer of the equation
-	
-	// For Apriltag
-	void getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy);
-						// px,py,pz : distance to center on each x,y,z axis 
-						// rx,ry,rz : rotation angle on each x,y,z axis
-						// cx,cy    : coordinate of apriltag's center point
-						
 	enum EFunc
 	{
 		FUNC_COLOR_DETECTION		= 1,
@@ -148,6 +112,7 @@ public:
 		LETTER_T,
 		LETTER_U,
 		LETTER_V,
+		LETTER_W,
 		LETTER_X,
 		LETTER_Y,
 		LETTER_Z
@@ -182,7 +147,79 @@ public:
 		VOICE_StandUp,		// ∞_•ﬂ
 		VOICE_SquatDown		// √€§U		
 	};
+
+
+	enum EApriltagField 
+	{
+		APRILTAG_POS_X=1,
+		APRILTAG_POS_Y,
+		APRILTAG_POS_Z,
+		APRILTAG_ROT_X,
+		APRILTAG_ROT_Y,
+		APRILTAG_ROT_Z,
+		APRILTAG_CENTER_X,
+		APRILTAG_CENTER_Y
+	};
+
+	enum ELanesField 
+	{
+	    LANES_LX1=1,
+	    LANES_LY1,
+	    LANES_LX2,
+	    LANES_LY2,
+	    LANES_RX1,
+	    LANES_RY1,
+	    LANES_RX2,
+	    LANES_RY2
+	};
+
+	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
+	void begin();		// Initialize the Pixetto
+	void end();         // Uninitialize the Pixetto
+	void flush();		// Clear the serial buffer.
 	
+	bool isDetected();  // Is there any object detected?
+	int getFuncID();    // ID of the detected object
+	int getTypeID();    // Type ID (color or shape or...) of the detected object
+	
+	int getPosX();      // x-coordinate of the upper-left corner of the detected object (range:0~100)
+						// In FUNC_LANES_DETECTION case, it's x-coordinate of the center point
+	int getPosY();      // y-coordinate of the upper-left corner of the detected object (range:0~100)
+						// In FUNC_LANES_DETECTION case, it's y-coordinate of the center point
+						
+	int getH();         // the height of the detected object (range:0~100)
+	int getW();         // the width of the detected object  (range:0~100)
+	int getHeight();    // the height of the detected object (range:0~100)
+	int getWidth();     // the width of the detected object  (range:0~100)
+	int	numObjects();	// the number of detected objects
+	
+	// For Lanes detection, 
+	//   get center point : getPosX(), getPosY()
+	//   get 4 end points of left and right lines : getLanePoints()
+	//   lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
+	//   rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
+	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
+						
+	// For Lanes detection, another function to get the 4 end points.
+	//   Get the value by given its corresponding field-id
+	//   ex. rx1 = getLanesField(Pixetto::LANES_LX1);
+	float getLanesField(Pixetto::ELanesField field);
+	
+	// For Apriltag detection
+	//   px,py,pz : distance to center on each x,y,z axis 
+	//   rx,ry,rz : rotation angle on each x,y,z axis
+	//   cx,cy    : coordinate of apriltag's center point
+	void getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy);
+						
+	// For Apriltag detection, another function to get the 8 values of apriltag.
+	//   Get the value by given its corresponding field-id
+	//   ex. px = getApriltagField(Pixetto::APRILTAG_POS_X);
+	float getApriltagField(Pixetto::EApriltagField field);
+	
+	// For Equation detection, it always returns the first one detected equation.						
+	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
+	float getEquationAnswer();					// the answer of the equation
+       
 private:
 	SoftwareSerial *swSer;
 	InnerSensor<HardwareSerial> *ss_hw;
