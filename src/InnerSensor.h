@@ -139,6 +139,17 @@ void InnerSensor<SerType>::enableUVC(bool uvc)
 template <class SerType>
 void InnerSensor<SerType>::begin()
 {                            
+	// reset to prevent from being blocked in u-boot.
+	swSerial->begin(115200);
+	swSerial->print("reset\n");
+	swSerial->print("reset\n");
+	swSerial->print("reset\n");
+	swSerial->flush();
+	delay(50);
+	flush();
+	swSerial->end();
+	delay(50);
+
 	swSerial->begin(38400);
 	swSerial->setTimeout(50);
 	hasDelayed = false;
