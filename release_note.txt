@@ -71,3 +71,8 @@ Changelog
     1. Remove redundant function IDs.
     2. Remove Pixetto class destructor.
     3. Add two functions getLanesField and getApriltagField for creating easy-to-use blocks in mblock5.
+
+2021-01-20	Release v1.4.2
+ * Resolve the problem that Pixetto can not be launched when connecting to Matrix Mini D1~D4 ports.
+ * For the case that Pixetto can not be launched when connecting to Arduino UNO board,
+   reset Pixetto only when opencam is timeout, instead of resetting every startup. 
