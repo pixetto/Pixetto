@@ -30,7 +30,7 @@
 
 #define PXT_BUF_SIZE		40
 
-#define MAX_OPENCAM_ERROR   7
+#define MAX_OPENCAM_ERROR   5
 #define MAX_HEX_ERROR   	30
 
 //#define DEBUG_LOG
@@ -62,6 +62,7 @@ public:
 	float getApriltagField(Pixetto::EApriltagField field);
 	
 private:
+	void resetUboot();
 	bool openCam();
 	bool readFromSerial();
 	bool verifyDataChecksum(uint8_t *buf, int len);
@@ -124,6 +125,26 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 }
 
 template <class SerType>
+void InnerSensor<SerType>::resetUboot()
+{
+	// reset to prevent from being blocked in u-boot.
+	end();
+	delay(50);
+	
+	swSerial->begin(115200);
+	swSerial->print("reset\n");
+	swSerial->print("reset\n");
+	swSerial->print("reset\n");
+	swSerial->flush();
+	delay(50);
+	flush();
+	swSerial->end();
+	delay(50);
+	
+	begin();
+}
+
+template <class SerType>
 void InnerSensor<SerType>::flush()
 {
 	while (swSerial->available() > 0)
@@ -139,17 +160,6 @@ void InnerSensor<SerType>::enableUVC(bool uvc)
 template <class SerType>
 void InnerSensor<SerType>::begin()
 {                            
-	// reset to prevent from being blocked in u-boot.
-	swSerial->begin(115200);
-	swSerial->print("reset\n");
-	swSerial->print("reset\n");
-	swSerial->print("reset\n");
-	swSerial->flush();
-	delay(50);
-	flush();
-	swSerial->end();
-	delay(50);
-
 	swSerial->begin(38400);
 	swSerial->setTimeout(50);
 	hasDelayed = false;
@@ -177,7 +187,15 @@ bool InnerSensor<SerType>::openCam()
 		hasDelayed = true;
 	}
 	else
-		delay(1000);
+		delay(500);
+
+	if (nOpenCamFailCount > MAX_OPENCAM_ERROR)
+	{
+		resetUboot();
+		bSendStreamOn = false;
+		nOpenCamFailCount = 0;
+		delay(2000);
+	}
 
 	// If it has not received response for the previous streamon cmd yet,
 	// do not send streamon command again.
@@ -185,7 +203,7 @@ bool InnerSensor<SerType>::openCam()
 	{
 		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
-		delay(2000);
+		delay(500);
 		flush();
 
 		SENSOR_CMD[2] =  PXT_CMD_STREAMON;
@@ -209,13 +227,15 @@ bool InnerSensor<SerType>::openCam()
 		while ((input = swSerial->read()) != PXT_PACKET_START)
 		{
 			if (input == 0xFF) // no data
+			{
+				nOpenCamFailCount++;
 				return false;
-                                              
+			}                                              
 			continue;
 		}
 
 		buffer[i++] = input;
-		 		
+
 		while ((input = swSerial->read()) != PXT_PACKET_END)
 		{
 			if (input == 0xFF) // no data 
@@ -223,7 +243,10 @@ bool InnerSensor<SerType>::openCam()
 				delay(1);
 				nodata++;
 				if (nodata > 10)
+				{
+					nOpenCamFailCount++;
 					return false;
+				}
 				else
 					continue;
 			}
@@ -237,6 +260,7 @@ bool InnerSensor<SerType>::openCam()
 				Serial.println("");
 				Serial.println("STREAMON CMD error!!");
 #endif
+				nOpenCamFailCount++;
 				return false;
 			}
 			buffer[i++] = input;
@@ -254,6 +278,7 @@ bool InnerSensor<SerType>::openCam()
 		}
 		else
 		{
+			nOpenCamFailCount++;
 #ifdef DEBUG_LOG
 			Serial.println("STREAMON Failed!!");
 #endif
@@ -262,11 +287,6 @@ bool InnerSensor<SerType>::openCam()
 	else
 	{      
 		nOpenCamFailCount++;
-		if (nOpenCamFailCount > MAX_OPENCAM_ERROR)
-		{
-			bSendStreamOn = false;
-			nOpenCamFailCount = 0;
-		}
 	}
 	return false;
 }
@@ -523,22 +543,7 @@ bool InnerSensor<SerType>::isDetected()
 #endif
 		if (nHexErrCount > MAX_HEX_ERROR)
 		{
-			this->end();
-			delay(50);
-			swSerial->begin(115200);
-			swSerial->print("reset\n");
-			swSerial->print("reset\n");
-			swSerial->print("reset\n");
-			swSerial->flush();
-#ifdef DEBUG_LOG
-			Serial.println("send reset");
-#endif
-			delay(50);
-			flush();
-			this->end();
-			delay(50);
-			
-			this->begin();
+			resetUboot();
 		}
 		
 		return false;

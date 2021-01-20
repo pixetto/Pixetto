@@ -24,7 +24,7 @@
 
 
 Pixetto::Pixetto(int rx, int tx)
-	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false)
+	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false), m_rx(rx), m_tx(tx)
 {
 	// https://www.arduino.cc/reference/en/language/functions/communication/serial/
 
@@ -105,6 +105,9 @@ void Pixetto::flush()
 
 bool Pixetto::isDetected()
 {
+	pinMode(m_rx, INPUT);
+  	pinMode(m_tx, OUTPUT);
+  
 	SS_FUNC(m_flag, isDetected)
 }
 

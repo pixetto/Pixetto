@@ -18,7 +18,7 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-#define PIXETTO_VERSION 1.4.1
+#define PIXETTO_VERSION 1.4.2
 
 template <class SerType>
 class InnerSensor;
@@ -225,6 +225,8 @@ private:
 	InnerSensor<HardwareSerial> *ss_hw;
 	InnerSensor<SoftwareSerial> *ss_sw;
 	bool m_flag;
+	int m_rx;
+	int m_tx;
 };
 
 #endif
