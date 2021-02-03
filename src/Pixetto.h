@@ -18,7 +18,7 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-#define PIXETTO_VERSION 1.4.2
+#define PIXETTO_VERSION 1.5.0
 
 template <class SerType>
 class InnerSensor;
@@ -177,6 +177,7 @@ public:
 	void begin();		// Initialize the Pixetto
 	void end();         // Uninitialize the Pixetto
 	void flush();		// Clear the serial buffer.
+	void enableFunc(Pixetto::EFunc fid); // Switch among functions.
 	
 	bool isDetected();  // Is there any object detected?
 	int getFuncID();    // ID of the detected object
@@ -216,7 +217,7 @@ public:
 	//   ex. px = getApriltagField(Pixetto::APRILTAG_POS_X);
 	float getApriltagField(Pixetto::EApriltagField field);
 	
-	// For Equation detection, it always returns the first one detected equation.						
+	// For Equation detection, it always returns the first one detected equation.
 	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
 	float getEquationAnswer();					// the answer of the equation
        

@@ -22,6 +22,7 @@
 
 #define PXT_CMD_STREAMON	0x79
 #define PXT_CMD_STREAMOFF	0x7A
+#define PXT_CMD_ENABLEFUNC	0x7D
 
 #define PXT_RET_CAM_SUCCESS	0xE0
 #define PXT_RET_CAM_ERROR	0xE1
@@ -45,6 +46,7 @@ public:
 	void begin();
 	void end();
 	void flush();
+	void enableFunc(Pixetto::EFunc fid);
 	
 	bool isDetected();
 	int getFuncID();
@@ -65,12 +67,14 @@ private:
 	void resetUboot();
 	bool openCam();
 	bool readFromSerial();
+	void calcDataChecksum(uint8_t *buf, int len);
 	bool verifyDataChecksum(uint8_t *buf, int len);
 	void parse_Lanes(uint8_t *buf);
 	void parse_Equation(uint8_t *buf, int len);
 	void parse_Apriltag(uint8_t *buf);
 	void parse_SimpleClassifier(uint8_t *buf);
-	                     
+	void sendFuncCommand();
+		                     
 	bool isCamOpened;
 	bool bSendStreamOn;
 	bool hasDelayed;
@@ -78,7 +82,10 @@ private:
 	int  nHexErrCount;
 	bool bEnableUVC;
 	unsigned long nTime4ObjNum;
-
+	
+	int  m_nFuncID;
+	bool m_bFuncDone;
+	
 	uint8_t m_inbuf[PXT_BUF_SIZE];
 	int m_dataLen;
 			
@@ -113,7 +120,7 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	m_x(0), m_y(0), m_h(0), m_w(0), m_eqAnswer(0), m_eqLen(0),
 	isCamOpened(false), hasDelayed(false), bSendStreamOn(false),
 	nHexErrCount(0), nOpenCamFailCount(0), bEnableUVC(false), nTime4ObjNum(0),
-	m_dataLen(0), 
+	m_dataLen(0), m_nFuncID(0), m_bFuncDone(true),
 	m_posx(0.0), m_posy(0.0), m_posz(0.0), m_rotx(0), m_roty(0), m_rotz(0),
 	m_centerx(0), m_centery(0)
 {
@@ -176,6 +183,40 @@ void InnerSensor<SerType>::end()
 }
 
 template <class SerType>
+void InnerSensor<SerType>::enableFunc(Pixetto::EFunc fid)
+{
+	if (fid < 0 || fid > Pixetto::FUNC_VOICE_COMMAND || fid == 5 || fid == 7) 
+		return;
+	
+	m_nFuncID = fid;
+	m_bFuncDone = false;
+#ifdef DEBUG_LOG
+	Serial.print("enableFunc=");
+	Serial.println(fid);
+#endif	
+}
+
+template <class SerType>
+void InnerSensor<SerType>::sendFuncCommand()
+{
+	if (!m_bFuncDone)
+	{
+		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x06, PXT_CMD_ENABLEFUNC, m_nFuncID, 0, PXT_PACKET_END};
+		calcDataChecksum(SENSOR_CMD, 6);
+		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
+#ifdef DEBUG_LOG
+		Serial.print("sendFuncCommand=");
+		for (int i=0; i<6; i++) {
+			Serial.print(SENSOR_CMD[i], HEX);
+			Serial.print(" ");
+		}
+		Serial.println(" ");
+#endif
+		m_bFuncDone = true;
+	}
+}
+
+template <class SerType>
 bool InnerSensor<SerType>::openCam()
 {
 	if (isCamOpened)
@@ -183,11 +224,11 @@ bool InnerSensor<SerType>::openCam()
 	
 	if (!hasDelayed)
 	{
-		delay(2000);		
+		delay(3000);		
 		hasDelayed = true;
 	}
 	else
-		delay(500);
+		delay(1000);
 
 	if (nOpenCamFailCount > MAX_OPENCAM_ERROR)
 	{
@@ -201,12 +242,15 @@ bool InnerSensor<SerType>::openCam()
 	// do not send streamon command again.
 	if (!bSendStreamOn)
 	{
+		flush();
 		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
+		calcDataChecksum(SENSOR_CMD, 5);
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 		delay(500);
 		flush();
 
 		SENSOR_CMD[2] =  PXT_CMD_STREAMON;
+		calcDataChecksum(SENSOR_CMD, 5);
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 	
 #ifdef DEBUG_LOG
@@ -291,7 +335,17 @@ bool InnerSensor<SerType>::openCam()
 	return false;
 }
 
-
+template <class SerType>
+void InnerSensor<SerType>::calcDataChecksum(uint8_t *buf, int len)
+{
+	uint8_t sum = 0;
+	for (int i=1; i<len-2; i++)
+		sum += buf[i];
+		
+	sum %= 256;
+	
+	buf[len-2] = sum; 
+}
 
 template <class SerType>
 bool InnerSensor<SerType>::verifyDataChecksum(uint8_t *buf, int len)
@@ -381,7 +435,7 @@ bool InnerSensor<SerType>::readFromSerial()
 	{
 		memset(tmpbuf, 0 ,sizeof(tmpbuf));
 		if ((readnum = swSerial->readBytes(tmpbuf, PXT_BUF_SIZE)) != 0) {
-#ifdef DEBUG_LOG
+#if 0 //#ifdef DEBUG_LOG
 			Serial.print("recv: ");
 			Serial.println(readnum);
 			for (int j=0; j<readnum; j++)
@@ -407,6 +461,9 @@ bool InnerSensor<SerType>::readFromSerial()
 	
 		if (i == readnum - 1) {
 			nHexErrCount++;
+#ifdef DEBUG_LOG
+			Serial.println("ErrCount+1: (i == readnum -1)");
+#endif
 			return false;
 		}
 		
@@ -414,6 +471,9 @@ bool InnerSensor<SerType>::readFromSerial()
 		int len = tmpbuf[i+1];
 		if (len < 0 || len > PXT_BUF_SIZE || len > readnum - i) {
 			nHexErrCount++;
+#ifdef DEBUG_LOG
+			Serial.println("ErrCount+1: (len < 0 || len > PXT_BUF_SIZE...)");
+#endif
 			return false;
 		}
 
@@ -424,7 +484,6 @@ bool InnerSensor<SerType>::readFromSerial()
 			nHexErrCount = 0;
 			m_dataLen = len;
 #ifdef DEBUG_LOG
-			Serial.println("Read one packet!!");
 			Serial.print("one packet: ");
 			for (int j=0; j<m_dataLen; j++)
 			{
@@ -452,7 +511,9 @@ bool InnerSensor<SerType>::readFromSerial()
 			i++;
 		}
 	}
-    //Serial.println("Nothing found!!");
+#ifdef DEBUG_LOG
+    Serial.println("ErrCount+1: (readFromSerial failed)");
+#endif
     nHexErrCount++;
 	return false;
 }
@@ -476,7 +537,9 @@ bool InnerSensor<SerType>::isDetected()
 		//	Serial.println("openCam() OK");
 #endif
 	}
-	
+
+	sendFuncCommand();
+		
 	if (readFromSerial())
 	{
 		m_id = m_inbuf[2];
@@ -533,19 +596,17 @@ bool InnerSensor<SerType>::isDetected()
 	}
 	else // no packet 
 	{
-#ifdef DEBUG_LOG
-		//Serial.println("  WRONG!! ");
-#endif			
 		// Received Error
 #ifdef DEBUG_LOG
-		Serial.print("Received Error:");
-		Serial.println(nHexErrCount);
-#endif
-		if (nHexErrCount > MAX_HEX_ERROR)
-		{
-			resetUboot();
+		if (nHexErrCount > 0) {
+			Serial.print("Received Error:");
+			Serial.println(nHexErrCount);
 		}
-		
+#endif
+		if (nHexErrCount > MAX_HEX_ERROR) {
+			nHexErrCount = 0;
+			resetUboot();
+		}		
 		return false;
 	}
 	return false;
