@@ -103,6 +103,11 @@ void Pixetto::flush()
 	SS_FUNC(m_flag, flush)
 }
 
+void Pixetto::setDetectMode(bool mode)
+{
+	SS_FUNC(m_flag, setDetectMode, mode)
+}
+
 void Pixetto::enableFunc(Pixetto::EFunc fid)
 {
 	SS_FUNC(m_flag, enableFunc, fid)

@@ -178,6 +178,7 @@ public:
 	void end();         // Uninitialize the Pixetto
 	void flush();		// Clear the serial buffer.
 	void enableFunc(Pixetto::EFunc fid); // Switch among functions.
+	void setDetectMode(bool mode=false);
 	
 	bool isDetected();  // Is there any object detected?
 	int getFuncID();    // ID of the detected object

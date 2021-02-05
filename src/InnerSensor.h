@@ -22,7 +22,9 @@
 
 #define PXT_CMD_STREAMON	0x79
 #define PXT_CMD_STREAMOFF	0x7A
+
 #define PXT_CMD_ENABLEFUNC	0x7D
+#define PXT_CMD_DETMODE		0x7E
 
 #define PXT_RET_CAM_SUCCESS	0xE0
 #define PXT_RET_CAM_ERROR	0xE1
@@ -47,6 +49,7 @@ public:
 	void end();
 	void flush();
 	void enableFunc(Pixetto::EFunc fid);
+	void setDetectMode(bool mode);
 	
 	bool isDetected();
 	int getFuncID();
@@ -73,6 +76,8 @@ private:
 	void parse_Equation(uint8_t *buf, int len);
 	void parse_Apriltag(uint8_t *buf);
 	void parse_SimpleClassifier(uint8_t *buf);
+	void sendDetModeCommand();
+	void sendQueryCommand();
 	void sendFuncCommand();
 		                     
 	bool isCamOpened;
@@ -81,6 +86,8 @@ private:
 	int  nOpenCamFailCount;
 	int  nHexErrCount;
 	bool bEnableUVC;
+	bool bDetMode;  // false: Event mode, true: Callback mode
+	bool m_bDetModeDone;
 	unsigned long nTime4ObjNum;
 	
 	int  m_nFuncID;
@@ -119,7 +126,8 @@ InnerSensor<SerType>::InnerSensor(SerType* p)
 	: m_id(0), m_type(0),
 	m_x(0), m_y(0), m_h(0), m_w(0), m_eqAnswer(0), m_eqLen(0),
 	isCamOpened(false), hasDelayed(false), bSendStreamOn(false),
-	nHexErrCount(0), nOpenCamFailCount(0), bEnableUVC(false), nTime4ObjNum(0),
+	nHexErrCount(0), nOpenCamFailCount(0), 
+	bEnableUVC(false), bDetMode(false), m_bDetModeDone(false), nTime4ObjNum(0),
 	m_dataLen(0), m_nFuncID(0), m_bFuncDone(true),
 	m_posx(0.0), m_posy(0.0), m_posz(0.0), m_rotx(0), m_roty(0), m_rotz(0),
 	m_centerx(0), m_centery(0)
@@ -165,6 +173,13 @@ void InnerSensor<SerType>::enableUVC(bool uvc)
 }
 
 template <class SerType>
+void InnerSensor<SerType>::setDetectMode(bool mode)
+{
+	bDetMode = mode;
+	m_bDetModeDone = false;
+}
+
+template <class SerType>
 void InnerSensor<SerType>::begin()
 {                            
 	swSerial->begin(38400);
@@ -197,20 +212,30 @@ void InnerSensor<SerType>::enableFunc(Pixetto::EFunc fid)
 }
 
 template <class SerType>
-void InnerSensor<SerType>::sendFuncCommand()
+void InnerSensor<SerType>::sendDetModeCommand()
+{       
+	uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x06, PXT_CMD_DETMODE, bDetMode?1:0, 0, PXT_PACKET_END};
+	calcDataChecksum(SENSOR_CMD, 6);		
+	swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
+}
+
+template <class SerType>
+void InnerSensor<SerType>::sendQueryCommand()
 {
-	if (!m_bFuncDone)
+	uint8_t SENSOR_CMD[] = {PXT_PACKET_START, 0x06, PXT_CMD_ENABLEFUNC, m_nFuncID, 0, PXT_PACKET_END};
+	calcDataChecksum(SENSOR_CMD, 6);
+	swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
+}
+
+template <class SerType>
+void InnerSensor<SerType>::sendFuncCommand()
+{       
+	if (!bDetMode && !m_bFuncDone)
 	{
-		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x06, PXT_CMD_ENABLEFUNC, m_nFuncID, 0, PXT_PACKET_END};
-		calcDataChecksum(SENSOR_CMD, 6);
-		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
-#ifdef DEBUG_LOG
+		sendQueryCommand();
+#ifdef DEBUG_LOG 
 		Serial.print("sendFuncCommand=");
-		for (int i=0; i<6; i++) {
-			Serial.print(SENSOR_CMD[i], HEX);
-			Serial.print(" ");
-		}
-		Serial.println(" ");
+		Serial.println(m_nFuncID);
 #endif
 		m_bFuncDone = true;
 	}
@@ -242,17 +267,16 @@ bool InnerSensor<SerType>::openCam()
 	// do not send streamon command again.
 	if (!bSendStreamOn)
 	{
-		flush();
-		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
+		uint8_t SENSOR_CMD[5] = {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
 		calcDataChecksum(SENSOR_CMD, 5);
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 		delay(500);
 		flush();
-
-		SENSOR_CMD[2] =  PXT_CMD_STREAMON;
+		
+   		SENSOR_CMD[2] = PXT_CMD_STREAMON;
 		calcDataChecksum(SENSOR_CMD, 5);
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
-	
+
 #ifdef DEBUG_LOG
 		Serial.println("send: STREAMON");
 #endif
@@ -270,6 +294,10 @@ bool InnerSensor<SerType>::openCam()
 		
 		while ((input = swSerial->read()) != PXT_PACKET_START)
 		{
+#ifdef DEBUG_LOG
+			Serial.print(input, HEX);
+			Serial.print(" ");
+#endif			
 			if (input == 0xFF) // no data
 			{
 				nOpenCamFailCount++;
@@ -279,9 +307,15 @@ bool InnerSensor<SerType>::openCam()
 		}
 
 		buffer[i++] = input;
-
+		
+#ifdef DEBUG_LOG
+        Serial.println("");
+#endif
 		while ((input = swSerial->read()) != PXT_PACKET_END)
 		{
+#ifdef DEBUG_LOG
+			Serial.print(input, HEX);Serial.print(" ");
+#endif
 			if (input == 0xFF) // no data 
 			{
 				delay(1);
@@ -312,12 +346,20 @@ bool InnerSensor<SerType>::openCam()
 		}	
 		buffer[i] = input;
 
+#ifdef DEBUG_LOG
+        Serial.println("");
+#endif
 		if (buffer[2] == PXT_RET_CAM_SUCCESS)
 		{
 #ifdef DEBUG_LOG
 			Serial.println("STREAMON OK!!");
 #endif
 			isCamOpened = true;
+			
+			if (!m_bDetModeDone) {
+				sendDetModeCommand();
+				m_bDetModeDone = true;
+			}
 			return true;
 		}
 		else
@@ -330,6 +372,9 @@ bool InnerSensor<SerType>::openCam()
 	}
 	else
 	{      
+#ifdef DEBUG_LOG
+		Serial.println("STREAMON no return!!");
+#endif
 		nOpenCamFailCount++;
 	}
 	return false;
@@ -431,11 +476,14 @@ bool InnerSensor<SerType>::readFromSerial()
 	uint8_t tmpbuf[PXT_BUF_SIZE];
 	int readnum = 0;
 	
+	int loop=0;
+	while (swSerial->available() <= 0 && loop < 20000) loop++;
+	
 	if (swSerial->available() > 0)
 	{
 		memset(tmpbuf, 0 ,sizeof(tmpbuf));
 		if ((readnum = swSerial->readBytes(tmpbuf, PXT_BUF_SIZE)) != 0) {
-#if 0 //#ifdef DEBUG_LOG
+#ifdef DEBUG_LOG
 			Serial.print("recv: ");
 			Serial.println(readnum);
 			for (int j=0; j<readnum; j++)
@@ -522,31 +570,39 @@ bool InnerSensor<SerType>::readFromSerial()
 template <class SerType>
 bool InnerSensor<SerType>::isDetected()
 {
-	if (!bEnableUVC)
+	if (bEnableUVC)	
+	{
+		sendDetModeCommand();
+	}
+	else 
 	{
 		bool ret = openCam();
-		if (!ret)
-		{
+		if (!ret) {
 #ifdef DEBUG_LOG
 			Serial.println("openCam() failed");
 #endif
 			return false;
 		}
-#ifdef DEBUG_LOG
-		//else
-		//	Serial.println("openCam() OK");
-#endif
 	}
 
 	sendFuncCommand();
-		
+	
+	if (bDetMode == true) {
+		flush();
+		sendQueryCommand();
+#ifdef DEBUG_LOG
+		Serial.print("=> send QUERY : func_id=");
+		Serial.println(m_nFuncID);
+#endif
+	}
+	 	
 	if (readFromSerial())
 	{
 		m_id = m_inbuf[2];
 	
 		if (m_id <= 0) {
 #ifdef DEBUG_LOG
-			Serial.println("  incorrect FuncID!!");
+			Serial.println("None is detected!!");
 #endif
 			return false;
 		}
