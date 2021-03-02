@@ -40,10 +40,10 @@ void loop()
 {
 	if (ss.isDetected()) {
 		// Available voice commands are defined in Pixetto.h.
-		if (ss.getFuncID() == ss.FUNC_VOICE_COMMAND) {
-			if (ss.getTypeID() == ss.VOICE_TurnOnLight){
+		if (ss.getFuncID() == Pixetto::FUNC_VOICE_COMMAND) {
+			if (ss.getTypeID() == Pixetto::VOICE_TurnOnLight){
 				digitalWrite(led, HIGH);
-			} else if (ss.getTypeID() == ss.VOICE_TurnOffLight){
+			} else if (ss.getTypeID() == Pixetto::VOICE_TurnOffLight){
 				digitalWrite(led, LOW);
 			}
 		} 

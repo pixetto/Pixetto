@@ -38,7 +38,7 @@ void setup()
 void loop()
 {
 	if (ss.isDetected()) {
-		if (ss.getFuncID() == ss.FUNC_APRILTAG) {
+		if (ss.getFuncID() == Pixetto::FUNC_APRILTAG) {
 			float px=0, py=0, pz=0;
 			int rx=0, ry=0, rz=0;
 			int cx=0, cy=0;

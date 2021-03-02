@@ -37,11 +37,11 @@ void setup()
 void loop()
 {
 	if (ss.isDetected()) {
-		if (ss.getFuncID() == ss.FUNC_COLOR_DETECTION) {
-			if (ss.getTypeID() == ss.COLOR_RED){
+		if (ss.getFuncID() == Pixetto::FUNC_COLOR_DETECTION) {
+			if (ss.getTypeID() == Pixetto::COLOR_RED){
 				digitalWrite(13, HIGH);
 				digitalWrite(11, LOW);
-			} else if (ss.getTypeID() == ss.COLOR_BLUE){
+			} else if (ss.getTypeID() == Pixetto::COLOR_BLUE){
 				digitalWrite(11, HIGH);
 				digitalWrite(13, LOW);
 			}
