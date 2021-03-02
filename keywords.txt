@@ -13,6 +13,7 @@ begin		KEYWORD2
 end			KEYWORD2
 flush		KEYWORD2
 enableFunc	KEYWORD2
+setDetectMode	KEYWORD2
 isDetected	KEYWORD2
 getFuncID	KEYWORD2
 getTypeID	KEYWORD2

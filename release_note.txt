@@ -76,3 +76,9 @@ Changelog
  * Resolve the problem that Pixetto can not be launched when connecting to Matrix Mini D1~D4 ports.
  * For the case that Pixetto can not be launched when connecting to Arduino UNO board,
    reset Pixetto only when opencam is timeout, instead of resetting every startup. 
+   
+2021-02-26	Release v1.5.0
+ * Add enableFunc() to switch among functions.
+
+2021-03-02	Release v1.5.1
+ * Add setDetectMode() to switch between callback/event mode.
