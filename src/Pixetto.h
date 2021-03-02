@@ -18,7 +18,7 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-#define PIXETTO_VERSION 1.5.0
+#define PIXETTO_VERSION 1.5.1
 
 template <class SerType>
 class InnerSensor;
@@ -178,7 +178,13 @@ public:
 	void end();         // Uninitialize the Pixetto
 	void flush();		// Clear the serial buffer.
 	void enableFunc(Pixetto::EFunc fid); // Switch among functions.
-	void setDetectMode(bool mode=false);
+
+	void setDetectMode(bool mode=false); // Set detect mode (false:event mode, true:callback mode)
+	                                     // Attention: the limit of callback mode:
+	                                     //   - Neural Network function does not work when object detection algorithm 
+										 //     is set to "Central", Blob Detection" and "Blob Detection (Kalman Filter)".
+										 //   - Voice Command function does not work on callback mode.
+										     
 	
 	bool isDetected();  // Is there any object detected?
 	int getFuncID();    // ID of the detected object
