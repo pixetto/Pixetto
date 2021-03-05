@@ -66,7 +66,7 @@ Changelog
  * Rename the file names to Pixetto.h/Pixetto.cpp.
 
 2021-01-11	Release v1.4.1
- * Fix the bug that Pixetto can not be launched successfully when connecting to Arudino UNO board (VID:2341 by arduino.org).  
+ * Fix the bug that Pixetto can not be launched successfully when connecting to Arudino UNO board (VID:2341 by arduino.cc).  
  * Modification for mblock5 porting.
     1. Remove redundant function IDs.
     2. Remove Pixetto class destructor.
