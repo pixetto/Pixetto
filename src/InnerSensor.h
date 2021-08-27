@@ -230,7 +230,7 @@ void InnerSensor<SerType>::enableFunc(Pixetto::EFunc fid)
 template <class SerType>
 void InnerSensor<SerType>::sendDetModeCommand()
 {       
-	uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x06, PXT_CMD_DETMODE, bDetMode?1:0, 0, PXT_PACKET_END};
+	uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x06, PXT_CMD_DETMODE, bDetMode?(uint8_t)1:(uint8_t)0, 0, PXT_PACKET_END};
 	calcDataChecksum(SENSOR_CMD, 6);		
 	swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 }
@@ -238,7 +238,7 @@ void InnerSensor<SerType>::sendDetModeCommand()
 template <class SerType>
 void InnerSensor<SerType>::sendQueryCommand()
 {
-	uint8_t SENSOR_CMD[] = {PXT_PACKET_START, 0x06, PXT_CMD_ENABLEFUNC, m_nFuncID, 0, PXT_PACKET_END};
+	uint8_t SENSOR_CMD[] = {PXT_PACKET_START, 0x06, PXT_CMD_ENABLEFUNC, (uint8_t)m_nFuncID, 0, PXT_PACKET_END};
 	calcDataChecksum(SENSOR_CMD, 6);
 	swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
 }
