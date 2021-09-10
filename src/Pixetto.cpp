@@ -16,18 +16,48 @@
 #include <Arduino.h>
 #include "InnerSensor.h"
 
+#if ESP32
+#define SS_FUNC(f, func, ...) \
+	if (f == true) \
+		return ss_hw->func(__VA_ARGS__);
+#else
 #define SS_FUNC(f, func, ...) \
 	if (f == true) \
 		return ss_hw->func(__VA_ARGS__); \
 	else \
 		return ss_sw->func(__VA_ARGS__);
-
+#endif
 
 Pixetto::Pixetto(int rx, int tx)
-	: swSer(0), ss_hw(0), ss_sw(0), m_flag(false), m_rx(rx), m_tx(tx)
+	: ss_hw(0), m_flag(false), m_rx(rx), m_tx(tx)
 {
-	// https://www.arduino.cc/reference/en/language/functions/communication/serial/
+#if ESP32
+	// C:\Users\xxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.6\cores\esp32\HardwareSerial.cpp
+	if (rx == 3 && tx == 1)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
+		return;
+	}
+	if (rx == 9 && tx == 10)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
+		return;
+	}
+	if (rx == 16 && tx == 17)
+	{
+		m_flag = true;
+		ss_hw = new InnerSensor<HardwareSerial>(&Serial2);
+		return;
+	}
+	return;
+	
+#else
+	swSer = 0;
+	ss_sw = 0;
 
+	// https://www.arduino.cc/reference/en/language/functions/communication/serial/
 #if defined(HAVE_HWSERIAL0) && defined(HAVE_HWSERIAL1) && defined(HAVE_HWSERIAL2) && defined(HAVE_HWSERIAL3)
 	// Mega, Due
 	if (rx == 0 && tx == 1)
@@ -81,6 +111,7 @@ Pixetto::Pixetto(int rx, int tx)
 	m_flag = false;
 	swSer = new SoftwareSerial(rx,tx);
 	ss_sw = new InnerSensor<SoftwareSerial>(swSer);
+#endif
 }
 
 void Pixetto::enableUVC(bool uvc)
@@ -119,51 +150,61 @@ bool Pixetto::isDetected()
   	pinMode(m_tx, OUTPUT);
   
 	SS_FUNC(m_flag, isDetected)
+	return false;
 }
 
 int Pixetto::getFuncID()
 {
 	SS_FUNC(m_flag, getFuncID)
+	return 0;
 }
 
 int Pixetto::getTypeID()
 {
 	SS_FUNC(m_flag, getTypeID)
+	return 0;
 }
 
 int Pixetto::getPosX()
 {
 	SS_FUNC(m_flag, getPosX)
+	return 0;
 }
 
 int Pixetto::getPosY()
 {
 	SS_FUNC(m_flag, getPosY)
+	return 0;
 }
 
 int Pixetto::getH()
 {
 	SS_FUNC(m_flag, getH)
+	return 0;
 }
 
 int Pixetto::getW()
 {
 	SS_FUNC(m_flag, getW)
+	return 0;
 }
 
 int Pixetto::getHeight()
 {
 	SS_FUNC(m_flag, getH)
+	return 0;
 }
 
 int Pixetto::getWidth()
 {
 	SS_FUNC(m_flag, getW)
+	return 0;
 }
 
 int Pixetto::numObjects()
 {
 	SS_FUNC(m_flag, numObjects)
+	return 0;
 }
 
 void Pixetto::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
@@ -179,6 +220,7 @@ void Pixetto::getEquationExpr(char *buf, int len)
 float Pixetto::getEquationAnswer()
 {
 	SS_FUNC(m_flag, getEquationAnswer)
+	return 0;
 }
 
 
@@ -191,9 +233,11 @@ void Pixetto::getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry,
 float Pixetto::getApriltagField(Pixetto::EApriltagField field)
 {
 	SS_FUNC(m_flag, getApriltagField, field)
+	return 0;
 }
 
 float Pixetto::getLanesField(Pixetto::ELanesField field)
 {
 	SS_FUNC(m_flag, getLanesField, field)
+	return 0;
 }

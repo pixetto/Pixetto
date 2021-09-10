@@ -85,3 +85,8 @@ Changelog
  
 2021-08-27	Release v1.5.2
  * Fix compiler warnings for narrowing conversion from int to uint8_t.
+
+2021-08-31  Release v1.5.3
+ * Add Autonomous Driving function.
+ * Add AutonomousDriving and VoiceColor examples.
+ * Add ESP32 board support (HardwareSerial only).

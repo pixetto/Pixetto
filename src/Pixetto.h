@@ -16,9 +16,11 @@
 #define Pixetto_h
 
 #include <Arduino.h>
+#if !defined(ESP32)
 #include <SoftwareSerial.h>
+#endif
 
-#define PIXETTO_VERSION 1.5.1
+#define PIXETTO_VERSION 1.5.3
 
 template <class SerType>
 class InnerSensor;
@@ -46,7 +48,8 @@ public:
 		FUNC_LANES_DETECTION		= 16,
 		FUNC_EQUATION_DETECTION		= 17,
 		FUNC_SIMPLE_CLASSIFIER		= 18,
-		FUNC_VOICE_COMMAND			= 19
+		FUNC_VOICE_COMMAND			= 19,
+		FUNC_AUTONOMOUS_DRIVING		= 20
 	};
 	
 	enum EColor
@@ -145,7 +148,9 @@ public:
 		VOICE_CloseEyes2,	// 閉眼
 		VOICE_Jump,			// 跳一下
 		VOICE_StandUp,		// 起立
-		VOICE_SquatDown		// 蹲下		
+		VOICE_SquatDown,	// 蹲下	
+		VOICE_WhatColor,	// 這是甚麼顏色
+		VOICE_WhatShape		// 這是甚麼形狀
 	};
 
 
@@ -174,6 +179,7 @@ public:
 	};
 
 	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
+									// While enabling UVC mode, set setDetectMode(true) to get more valid result.
 	void begin();		// Initialize the Pixetto
 	void end();         // Uninitialize the Pixetto
 	void flush();		// Clear the serial buffer.
@@ -189,7 +195,9 @@ public:
 	bool isDetected();  // Is there any object detected?
 	int getFuncID();    // ID of the detected object
 	int getTypeID();    // Type ID (color or shape or...) of the detected object
-	
+						// Attention:
+						//	- For Lane and traffic sign detection, TypeID is valid only when getTypeID() >= 0	
+			
 	int getPosX();      // x-coordinate of the upper-left corner of the detected object (range:0~100)
 						// In FUNC_LANES_DETECTION case, it's x-coordinate of the center point
 	int getPosY();      // y-coordinate of the upper-left corner of the detected object (range:0~100)
@@ -201,11 +209,15 @@ public:
 	int getWidth();     // the width of the detected object  (range:0~100)
 	int	numObjects();	// the number of detected objects
 	
+	
 	// For Lanes detection, 
 	//   get center point : getPosX(), getPosY()
 	//   get 4 end points of left and right lines : getLanePoints()
 	//   lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
 	//   rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
+	
+	// For lane and traffic sign etection,
+	// the 10 fields (PosX, PosY, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2) are valid only when getPosX() >= 0
 	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
 						
 	// For Lanes detection, another function to get the 4 end points.
@@ -227,11 +239,13 @@ public:
 	// For Equation detection, it always returns the first one detected equation.
 	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
 	float getEquationAnswer();					// the answer of the equation
-       
+	
 private:
+#if !defined(ESP32)
 	SoftwareSerial *swSer;
-	InnerSensor<HardwareSerial> *ss_hw;
 	InnerSensor<SoftwareSerial> *ss_sw;
+#endif
+	InnerSensor<HardwareSerial> *ss_hw;
 	bool m_flag;
 	int m_rx;
 	int m_tx;
