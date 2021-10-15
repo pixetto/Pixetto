@@ -20,7 +20,7 @@
 #include <SoftwareSerial.h>
 #endif
 
-#define PIXETTO_VERSION 1.5.3
+#define PIXETTO_VERSION 1.5.4
 
 template <class SerType>
 class InnerSensor;

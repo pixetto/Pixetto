@@ -90,3 +90,7 @@ Changelog
  * Add Autonomous Driving function.
  * Add AutonomousDriving and VoiceColor examples.
  * Add ESP32 board support (HardwareSerial only).
+ 
+2021-10-15	Release v1.5.4
+ * Fix camera cannot be reopen from arduino after it reboots abnormally. 
+   Workaround: Reopen camera if there is no receiving data in 6 seconds.

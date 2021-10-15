@@ -68,7 +68,7 @@ public:
 	bool hasTrafficSign();	
 private:
 	void resetUboot();
-	bool openCam();
+	bool openCam(bool bCheckAlive);
 	bool readFromSerial();
 	void calcDataChecksum(uint8_t *buf, int len);
 	bool verifyDataChecksum(uint8_t *buf, int len);
@@ -87,6 +87,7 @@ private:
 	bool hasDelayed;
 	int  nOpenCamFailCount;
 	int  nHexErrCount;
+	int  nNoDataCount;
 	unsigned long nTime4ObjNum;
 	bool bEnableUVC;
 	bool bDetMode;  // false: Event mode, true: Callback mode
@@ -126,7 +127,7 @@ private:
 template <class SerType>
 InnerSensor<SerType>::InnerSensor(SerType* p) :
 	isCamOpened(false), bSendStreamOn(false), hasDelayed(false),
-	nOpenCamFailCount(0), nHexErrCount(0), nTime4ObjNum(0), 
+	nOpenCamFailCount(0), nHexErrCount(0), nNoDataCount(0), nTime4ObjNum(0), 
 	bEnableUVC(false), bDetMode(false), m_bDetModeDone(false),
 	m_nFuncID(0), m_bFuncDone(true), m_dataLen(0),
 	m_id(0), m_type(0),	m_x(0), m_y(0), m_h(0), m_w(0), m_objnum(0),
@@ -194,6 +195,7 @@ void InnerSensor<SerType>::begin()
 	bSendStreamOn = false;
 	nOpenCamFailCount = 0;
 	nHexErrCount = 0; 
+	nNoDataCount = 0;
 }
 
 template <class SerType>
@@ -260,9 +262,13 @@ void InnerSensor<SerType>::sendFuncCommand()
 }
 
 template <class SerType>
-bool InnerSensor<SerType>::openCam()
+bool InnerSensor<SerType>::openCam(bool bCheckAlive)
 {
-	if (isCamOpened)
+	if (bCheckAlive) {
+		bSendStreamOn = false;
+		isCamOpened = false;
+	}
+	else if (isCamOpened)
 		return true;
 	
 	if (!hasDelayed)
@@ -286,11 +292,12 @@ bool InnerSensor<SerType>::openCam()
 	if (!bSendStreamOn)
 	{
 		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
-		calcDataChecksum(SENSOR_CMD, 5);
-		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
-		delay(500);
+		if (!bCheckAlive) {
+			calcDataChecksum(SENSOR_CMD, 5);
+			swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
+			delay(500);
+		}
 		flush();
-
 		SENSOR_CMD[2] = PXT_CMD_STREAMON;
 		calcDataChecksum(SENSOR_CMD, 5);
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
@@ -373,6 +380,7 @@ bool InnerSensor<SerType>::openCam()
 			Serial.println("STREAMON OK!!");
 #endif
 			isCamOpened = true;
+			nOpenCamFailCount = 0;
 			
 			if (!m_bDetModeDone) {
 				sendDetModeCommand();
@@ -541,9 +549,20 @@ bool InnerSensor<SerType>::readFromSerial()
 		}
 	}
 	
-	if (readnum == 0)
+	if (readnum == 0) {
+		nNoDataCount++;
+#ifdef DEBUG_LOG
+		//Serial.print("NoDataCount=");
+		//Serial.println(nNoDataCount);
+#endif
+		if (nNoDataCount > 250) {
+			openCam(true);
+			nNoDataCount = 0;
+		}
 		return false;
-	
+	}
+	nNoDataCount = 0;
+		
 	int i = 0;
 	while (i < readnum) 
 	{
@@ -621,7 +640,7 @@ bool InnerSensor<SerType>::isDetected()
 	}
 	else
 	{
-		bool ret = openCam();
+		bool ret = openCam(false);
 		if (!ret) 
 		{
 #ifdef DEBUG_LOG
