@@ -27,6 +27,7 @@
 
 #define PXT_RET_CAM_SUCCESS	0xE0
 #define PXT_RET_CAM_ERROR	0xE1
+#define PXT_RET_FW_VERSION	0xE3
 
 #define PXT_RET_OBJNUM		0x46 //70
 
@@ -34,8 +35,15 @@
 
 #define MAX_OPENCAM_ERROR   5
 #define MAX_HEX_ERROR   	30
+#define PXT_TIMEOUT			7000
+
+#define PRODUCT_PIXETTO		1
+#define PRODUCT_HARPCAM		2
 
 //#define DEBUG_LOG
+
+int g_nPixettoVerKeepAlive[3] = {1,5,4}; 
+int g_nHarpcamVerKeepAlive[3] = {0,1,2};
 
 template <class SerType>
 class InnerSensor
@@ -67,11 +75,12 @@ public:
 	bool hasLane();
 	bool hasTrafficSign();	
 private:
-	void resetUboot();
-	bool openCam(bool bCheckAlive);
+	void resetSensor();
+	bool openCam();
 	bool readFromSerial();
 	void calcDataChecksum(uint8_t *buf, int len);
 	bool verifyDataChecksum(uint8_t *buf, int len);
+	void parse_Version(uint8_t *buf);
 	void parse_Lanes(uint8_t *buf);
 	void parse_Equation(uint8_t *buf, int len);
 	void parse_Apriltag(uint8_t *buf);
@@ -87,11 +96,14 @@ private:
 	bool hasDelayed;
 	int  nOpenCamFailCount;
 	int  nHexErrCount;
-	int  nNoDataCount;
+	unsigned long nTimeKeepAlive;
 	unsigned long nTime4ObjNum;
 	bool bEnableUVC;
 	bool bDetMode;  // false: Event mode, true: Callback mode
 	bool m_bDetModeDone;
+	
+	bool bEnableKeepAlive;
+	int  nVersion[4];
 	
 	int  m_nFuncID;
 	bool m_bFuncDone;
@@ -127,8 +139,9 @@ private:
 template <class SerType>
 InnerSensor<SerType>::InnerSensor(SerType* p) :
 	isCamOpened(false), bSendStreamOn(false), hasDelayed(false),
-	nOpenCamFailCount(0), nHexErrCount(0), nNoDataCount(0), nTime4ObjNum(0), 
+	nOpenCamFailCount(0), nHexErrCount(0), nTimeKeepAlive(0), nTime4ObjNum(0), 
 	bEnableUVC(false), bDetMode(false), m_bDetModeDone(false),
+	bEnableKeepAlive(false),
 	m_nFuncID(0), m_bFuncDone(true), m_dataLen(0),
 	m_id(0), m_type(0),	m_x(0), m_y(0), m_h(0), m_w(0), m_objnum(0),
 	m_eqAnswer(0), m_eqLen(0),
@@ -136,17 +149,18 @@ InnerSensor<SerType>::InnerSensor(SerType* p) :
 	m_centerx(0), m_centery(0)
 {
 	swSerial = p;
-	
+
+	memset(nVersion, 0, sizeof(nVersion)); 	
 	memset(m_inbuf,  0, sizeof(m_inbuf));
 	memset(m_points, 0, sizeof(m_points));
 	memset(m_eqExpr, 0, sizeof(m_eqExpr));
 }
 
 template <class SerType>
-void InnerSensor<SerType>::resetUboot()
+void InnerSensor<SerType>::resetSensor()
 {
 #ifdef DEBUG_LOG
-	Serial.println("resetUboot");
+	Serial.println("resetSensor");
 #endif	
 	// reset to prevent from being blocked in u-boot.
 	end();
@@ -188,14 +202,17 @@ void InnerSensor<SerType>::setDetectMode(bool mode)
 template <class SerType>
 void InnerSensor<SerType>::begin()
 {                            
+#ifdef DEBUG_LOG
+	Serial.println("begin");
+#endif	
 	swSerial->begin(38400);
 	swSerial->setTimeout(50);
 	hasDelayed = false;
 	isCamOpened = false;
 	bSendStreamOn = false;
 	nOpenCamFailCount = 0;
-	nHexErrCount = 0; 
-	nNoDataCount = 0;
+	nHexErrCount = 0;
+	nTimeKeepAlive = 0;
 }
 
 template <class SerType>
@@ -262,42 +279,39 @@ void InnerSensor<SerType>::sendFuncCommand()
 }
 
 template <class SerType>
-bool InnerSensor<SerType>::openCam(bool bCheckAlive)
+bool InnerSensor<SerType>::openCam()
 {
-	if (bCheckAlive) {
-		bSendStreamOn = false;
-		isCamOpened = false;
-	}
-	else if (isCamOpened)
-		return true;
-	
-	if (!hasDelayed)
-	{
-		delay(3000);		
-		hasDelayed = true;
-	}
-	else
-		delay(1000);
-
-	if (nOpenCamFailCount > MAX_OPENCAM_ERROR)
-	{
-		resetUboot();
-		bSendStreamOn = false;
-		nOpenCamFailCount = 0;
+	if ((nOpenCamFailCount > MAX_OPENCAM_ERROR) || // open camera failed
+		(isCamOpened && bEnableKeepAlive && (millis() - nTimeKeepAlive) > PXT_TIMEOUT)) { // camera is not alive.
+#ifdef DEBUG_LOG
+		Serial.println("Open camera failed or camera is not alive!");
+#endif
+		resetSensor();
 		delay(2000);
 	}
-
+	else {
+	   	if (isCamOpened)
+			return true;
+		
+		if (!hasDelayed)
+		{
+			delay(3000);		
+			hasDelayed = true;
+		}
+		else
+			delay(1000);
+	}
+	
 	// If it has not received response for the previous streamon cmd yet,
 	// do not send streamon command again.
 	if (!bSendStreamOn)
 	{
 		uint8_t SENSOR_CMD[] =  {PXT_PACKET_START, 0x05, PXT_CMD_STREAMOFF, 0, PXT_PACKET_END};
-		if (!bCheckAlive) {
-			calcDataChecksum(SENSOR_CMD, 5);
-			swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
-			delay(500);
-		}
+		calcDataChecksum(SENSOR_CMD, 5);
+		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
+		delay(500);
 		flush();
+
 		SENSOR_CMD[2] = PXT_CMD_STREAMON;
 		calcDataChecksum(SENSOR_CMD, 5);
 		swSerial->write(SENSOR_CMD, sizeof(SENSOR_CMD)/sizeof(uint8_t));
@@ -380,6 +394,7 @@ bool InnerSensor<SerType>::openCam(bool bCheckAlive)
 			Serial.println("STREAMON OK!!");
 #endif
 			isCamOpened = true;
+			nTimeKeepAlive = millis();
 			nOpenCamFailCount = 0;
 			
 			if (!m_bDetModeDone) {
@@ -429,6 +444,46 @@ bool InnerSensor<SerType>::verifyDataChecksum(uint8_t *buf, int len)
 	sum %= 256;
 	
 	return (sum == buf[len-2]);
+}
+
+template <class SerType>
+void InnerSensor<SerType>::parse_Version(uint8_t *buf)
+{
+	nVersion[0] = buf[3];
+	nVersion[1] = buf[4];
+	nVersion[2] = buf[5];
+	nVersion[3] = buf[6];
+	
+	int *pver = 0;
+	if (nVersion[0] == PRODUCT_PIXETTO) {
+		pver = g_nPixettoVerKeepAlive;
+#ifdef DEBUG_LOG
+		Serial.println("Product: Pixetto");
+#endif
+	}		
+	else if (nVersion[0] == PRODUCT_HARPCAM) {
+		pver = g_nHarpcamVerKeepAlive;
+#ifdef DEBUG_LOG
+		Serial.println("Product: Harpcam");
+#endif
+	}		
+		
+#ifdef DEBUG_LOG
+	Serial.print("Firmware version: ");
+	Serial.print(nVersion[1]); Serial.print(".");
+	Serial.print(nVersion[2]); Serial.print(".");
+	Serial.println(nVersion[3]);
+#endif
+	
+	if ((nVersion[1] > pver[0]) or 
+		(nVersion[1] == pver[0] && nVersion[2] > pver[1]) or
+		(nVersion[1] == pver[0] && nVersion[2] == pver[1] && nVersion[3] >= pver[2]))
+	{
+		bEnableKeepAlive = true;
+#ifdef DEBUG_LOG
+		Serial.println("Enable KeepAlive");
+#endif
+	}	
 }
 
 template <class SerType>
@@ -498,7 +553,8 @@ void InnerSensor<SerType>::parse_SimpleClassifier(uint8_t *buf)
 
 template <class SerType>
 void InnerSensor<SerType>::parse_LaneAndSign(uint8_t *buf)
-{
+{	
+	// buf[18]  0:null 1:lane 2:sign 3:both
 	if (buf[18] == 0 || buf[18] == 2)
 	{
 		m_x = -1; m_y = -1;
@@ -528,8 +584,22 @@ bool InnerSensor<SerType>::readFromSerial()
 	int readnum = 0;
 
 	if (bDetMode == true) {
-		int loop=0;
-		while (swSerial->available() <= 0 && loop < 100000) loop++;
+		unsigned long loop=0;
+		while (swSerial->available() <= 0 && loop < 100000 * 5) loop++;
+		
+#ifdef DEBUG_LOG
+		Serial.print(loop);
+		Serial.println("   Query loop end!");
+#endif
+		
+		if (loop == 100000 * 5) {
+#ifdef DEBUG_LOG
+			Serial.println("Query no reponse!");
+#endif
+			resetSensor();
+			delay(2000);
+			return false;
+		}
 	}
 	
 	if (swSerial->available() > 0)
@@ -549,20 +619,9 @@ bool InnerSensor<SerType>::readFromSerial()
 		}
 	}
 	
-	if (readnum == 0) {
-		nNoDataCount++;
-#ifdef DEBUG_LOG
-		//Serial.print("NoDataCount=");
-		//Serial.println(nNoDataCount);
-#endif
-		if (nNoDataCount > 250) {
-			openCam(true);
-			nNoDataCount = 0;
-		}
+	if (readnum == 0) 
 		return false;
-	}
-	nNoDataCount = 0;
-		
+	
 	int i = 0;
 	while (i < readnum) 
 	{
@@ -586,6 +645,7 @@ bool InnerSensor<SerType>::readFromSerial()
 #ifdef DEBUG_LOG
 			Serial.println("ErrCount+1: (len < 0 || len > PXT_BUF_SIZE...)");
 #endif
+			flush(); // for long packets, once a broken packet occurs, subsequent packets will be always broken and never recovered until reboot.
 			return false;
 		}
 
@@ -607,6 +667,7 @@ bool InnerSensor<SerType>::readFromSerial()
 
 			// if OBJNUM is received, parse one more packet for real object
 			if (m_inbuf[2] == PXT_RET_OBJNUM) {
+				nTimeKeepAlive = millis();
 				if (m_inbuf[3] > 0) { 
 				    m_objnum  = m_inbuf[3];
 				    nTime4ObjNum = millis();
@@ -640,7 +701,7 @@ bool InnerSensor<SerType>::isDetected()
 	}
 	else
 	{
-		bool ret = openCam(false);
+		bool ret = openCam();
 		if (!ret) 
 		{
 #ifdef DEBUG_LOG
@@ -666,41 +727,40 @@ bool InnerSensor<SerType>::isDetected()
 	if (readFromSerial())
 	{
 		m_id = m_inbuf[2];
-	
-		if (m_id <= 0) {
+		nTimeKeepAlive = millis();
+
+		if (m_id == 0) {
 #ifdef DEBUG_LOG
 			Serial.println("None is detected!!");
 #endif
 			return false;
 		}
-				
-		if (m_id == Pixetto::FUNC_LANES_DETECTION)
-		{
+
+		if (m_id == (int)PXT_RET_FW_VERSION) {
+			parse_Version(m_inbuf);
+		}	
+		else if (m_id == Pixetto::FUNC_LANES_DETECTION)	{
 			parse_Lanes(m_inbuf);
 			m_objnum = 1;
 		}
-		else if (m_id == Pixetto::FUNC_EQUATION_DETECTION)
-		{
+		else if (m_id == Pixetto::FUNC_EQUATION_DETECTION) {
 		 	parse_Equation(m_inbuf, m_dataLen);
 		 	m_objnum = 1;
 		}
-		else if (m_id == Pixetto::FUNC_APRILTAG)
-		{
+		else if (m_id == Pixetto::FUNC_APRILTAG) {
 			parse_Apriltag(m_inbuf);
 		}
-		else if (m_id == Pixetto::FUNC_SIMPLE_CLASSIFIER)
-		{
+		else if (m_id == Pixetto::FUNC_SIMPLE_CLASSIFIER) {
 			parse_SimpleClassifier(m_inbuf);
 		}
-		else if (m_id == Pixetto::FUNC_AUTONOMOUS_DRIVING)
-		{
+		else if (m_id == Pixetto::FUNC_AUTONOMOUS_DRIVING) {
 			parse_LaneAndSign(m_inbuf);
 			m_objnum = 1;
 		}
-		else
-		{
+		else {
 			m_type = m_inbuf[3];
 
+			/*
 			if (m_id == PXT_RET_OBJNUM) {
 				if (m_type > 0) { 
 				    m_objnum  = m_type;
@@ -710,7 +770,7 @@ bool InnerSensor<SerType>::isDetected()
 				//	m_objnum  = m_type;
 				//}
 				return isDetected();
-			}
+			} */
 			m_x = m_inbuf[4];
 			m_y = m_inbuf[5];
 			m_w = m_inbuf[6];
@@ -733,7 +793,7 @@ bool InnerSensor<SerType>::isDetected()
 #endif
 		if (nHexErrCount > MAX_HEX_ERROR) {
 			nHexErrCount = 0;
-			resetUboot();
+			resetSensor();
 		}		
 		return false;
 	}

@@ -94,3 +94,4 @@ Changelog
 2021-10-15	Release v1.5.4
  * Fix camera cannot be reopen from arduino after it reboots abnormally. 
    Workaround: Reopen camera if there is no receiving data in 6 seconds.
+
