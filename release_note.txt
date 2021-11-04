@@ -100,3 +100,6 @@ Changelog
    If no packet is received after 7 seconds, reboot pixetto.
    Only enable keepalive checking when pixetto fw >= 1.5.4 or harpcam fw >= 0.1.2.
 
+2021-11-01	Release v1.5.7
+ * Fix a bug that returning invalid data (when detect nothing) in LanesDetection. Only valid data should be returned.
+ * Add examples for LanesDetection and DigitalOperation.

@@ -81,7 +81,7 @@ private:
 	void calcDataChecksum(uint8_t *buf, int len);
 	bool verifyDataChecksum(uint8_t *buf, int len);
 	void parse_Version(uint8_t *buf);
-	void parse_Lanes(uint8_t *buf);
+	bool parse_Lanes(uint8_t *buf);
 	void parse_Equation(uint8_t *buf, int len);
 	void parse_Apriltag(uint8_t *buf);
 	void parse_SimpleClassifier(uint8_t *buf);
@@ -487,12 +487,23 @@ void InnerSensor<SerType>::parse_Version(uint8_t *buf)
 }
 
 template <class SerType>
-void InnerSensor<SerType>::parse_Lanes(uint8_t *buf)
+bool InnerSensor<SerType>::parse_Lanes(uint8_t *buf)
 {
+    int aa = 0;
+    bool valid = false;
+    for (aa=3; aa<13; aa++) {
+        if (buf[aa] != 0) {
+            valid=true;
+            break;
+        }
+    }
+    
 	m_x = buf[3];
 	m_y = buf[4];
-	for (int aa=0; aa<8; aa++)
+	for (aa=0; aa<8; aa++)
 		m_points[aa] = buf[aa+5];
+        
+    return valid;
 }
 
 template <class SerType>
@@ -740,8 +751,11 @@ bool InnerSensor<SerType>::isDetected()
 			parse_Version(m_inbuf);
 		}	
 		else if (m_id == Pixetto::FUNC_LANES_DETECTION)	{
-			parse_Lanes(m_inbuf);
-			m_objnum = 1;
+			bool ret = parse_Lanes(m_inbuf);
+            if (!ret)
+                return false;
+            else
+			 m_objnum = 1;
 		}
 		else if (m_id == Pixetto::FUNC_EQUATION_DETECTION) {
 		 	parse_Equation(m_inbuf, m_dataLen);
