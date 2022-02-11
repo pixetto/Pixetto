@@ -27,13 +27,8 @@ Pixetto ss(rxPin, txPin);
 
 void setup()
 {
-	//Serial.begin(9600);
+	Serial.begin(9600);
 	ss.begin();
-	
-	ss.enableFunc(Pixetto::FUNC_AUTONOMOUS_DRIVING);
-	//ss.enableUVC(true);
-	
-	ss.setDetectMode(false);
 }
 
 

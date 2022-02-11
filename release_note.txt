@@ -103,3 +103,7 @@ Changelog
 2021-11-01	Release v1.5.7
  * Fix a bug that returning invalid data (when detect nothing) in LanesDetection. Only valid data should be returned.
  * Add examples for LanesDetection and DigitalOperation.
+
+2021-11-25  Release v1.5.8
+ * Remove reset uboot code, since stucking in uboot case will no longer happen.
+ * Fix a bug that returning invalid data (when detect nothing) in AutonomousDriving. Only valid data should be returned.

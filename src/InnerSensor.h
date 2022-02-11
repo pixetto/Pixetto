@@ -164,7 +164,8 @@ void InnerSensor<SerType>::resetSensor()
 #endif	
 	// reset to prevent from being blocked in u-boot.
 	end();
-	delay(50);
+	/*
+    delay(50);
 	
 	swSerial->begin(115200);
 	swSerial->print("reset\n");
@@ -175,7 +176,7 @@ void InnerSensor<SerType>::resetSensor()
 	flush();
 	swSerial->end();
 	delay(50);
-	
+	*/
 	begin();
 }
 
@@ -572,10 +573,24 @@ void InnerSensor<SerType>::parse_LaneAndSign(uint8_t *buf)
 	}
 	else
 	{
-	   	m_x = buf[3];
-		m_y = buf[4];
-		for (int aa=0; aa<8; aa++)
-			m_points[aa] = buf[aa+5];
+        int aa=0;
+        bool valid = false;
+        for (aa=3; aa<13; aa++) {
+          if (buf[aa] != 0) {
+              valid=true;
+              break;
+            }
+        }
+
+        if (!valid) {
+            m_x = -1; m_y = -1;
+        }
+        else {
+    	   	m_x = buf[3];
+    		m_y = buf[4];
+    		for (aa=0; aa<8; aa++)
+    			m_points[aa] = buf[aa+5];
+        }
 	}
 	
 	if (buf[18] == 0 || buf[18] == 1)
