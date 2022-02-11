@@ -20,7 +20,7 @@
 #include <SoftwareSerial.h>
 #endif
 
-#define PIXETTO_VERSION 1.5.8
+#define PIXETTO_VERSION 1.6.1
 
 template <class SerType>
 class InnerSensor;
@@ -44,12 +44,12 @@ public:
 		FUNC_TRAFFIC_SIGN_DETECTION	= 12,
 		FUNC_HANDWRITTEN_DIGITS_DETECTION	= 13,
 		FUNC_HANDWRITTEN_LETTERS_DETECTION	= 14,
-		FUNC_CLOUD_DETECTION		= 15,
+		FUNC_CLOUD_DETECTION		= 15,  // not supported by harp-cam
 		FUNC_LANES_DETECTION		= 16,
 		FUNC_EQUATION_DETECTION		= 17,
-		FUNC_SIMPLE_CLASSIFIER		= 18,
-		FUNC_VOICE_COMMAND			= 19,
-		FUNC_AUTONOMOUS_DRIVING		= 20
+		FUNC_SIMPLE_CLASSIFIER		= 18,  // not supported by harp-cam
+		FUNC_VOICE_COMMAND			= 19,  // not supported by harp-cam
+		FUNC_AUTONOMOUS_DRIVING		= 20   // not supported by harp-cam
 	};
 	
 	enum EColor
@@ -150,7 +150,24 @@ public:
 		VOICE_StandUp,		// 起立
 		VOICE_SquatDown,	// 蹲下	
 		VOICE_WhatColor,	// 這是甚麼顏色
-		VOICE_WhatShape		// 這是甚麼形狀
+		VOICE_WhatShape,	// 這是甚麼形狀
+		VOICE_ColorDetect,  // 顏色偵測
+		VOICE_ColorCode,    // 顏色組合偵測
+		VOICE_ShapeDetect,  // 形狀偵測
+		VOICE_ShpereDetect, // 球體偵測
+		VOICE_Template,     // 模板匹配
+		VOICE_Keypoints,    // 特徵點偵測
+		VOICE_NeuralNetwork,// 神經網路辨識
+		VOICE_TrafficSign,  // 交通標誌辨識
+		VOICE_HandDigits,   // 手寫數字辨識
+		VOICE_HandLetters,  // 手寫字母辨識
+		VOICE_DigitsOp,     // 數字運算
+		VOICE_Lanes,        // 車道偵測
+		VOICE_Face,         // 人臉偵測
+		VOICE_RemoteComputing,// 遠端運算
+		VOICE_SimpleClassifier,// 簡易分類器
+		VOICE_AutoDrive,    // 自動駕駛
+		VOICE_StopDetect  // 停止偵測功能
 	};
 
 
@@ -178,20 +195,21 @@ public:
 	    LANES_RY2
 	};
 
-	void enableUVC(bool uvc=false);	// Enable UVC mode while connecting to USB and grove simultaneously
-									// While enabling UVC mode, set setDetectMode(true) to get more valid result.
 	void begin();		// Initialize the Pixetto
 	void end();         // Uninitialize the Pixetto
 	void flush();		// Clear the serial buffer.
 	void enableFunc(Pixetto::EFunc fid); // Switch among functions.
 
-	void setDetectMode(bool mode=false); // Set detect mode (false:event mode, true:callback mode)
+	void setDetectMode(bool mode=false); // Set detect mode (true:stream mode, false:callback mode)
 	                                     // Attention: the limit of callback mode:
 	                                     //   - Neural Network function does not work when object detection algorithm 
 										 //     is set to "Central", Blob Detection" and "Blob Detection (Kalman Filter)".
 										 //   - Voice Command function does not work on callback mode.
 										     
-	
+	long getVersion();   // Get piextto firmware version
+						// return -1: camera is not ready
+						// return version: camera is ready.
+
 	bool isDetected();  // Is there any object detected?
 	int getFuncID();    // ID of the detected object
 	int getTypeID();    // Type ID (color or shape or...) of the detected object
@@ -208,6 +226,8 @@ public:
 	int getHeight();    // the height of the detected object (range:0~100)
 	int getWidth();     // the width of the detected object  (range:0~100)
 	int	numObjects();	// the number of detected objects
+	int getSequenceID();// the detected objects from the same frame return the same sequence ID.
+
 	
 	
 	// For Lanes detection, 

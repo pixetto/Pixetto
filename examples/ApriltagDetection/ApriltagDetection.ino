@@ -30,8 +30,9 @@ float tag_size = 8; //  (cm) tag length
 void setup()
 {
   Serial.begin(9600);
-	ss.begin();
-  //ss.enableUVC(true);
+  ss.begin();
+  ss.setDetectMode(false);
+  ss.enableFunc(Pixetto::FUNC_APRILTAG);
 }
 
 
@@ -44,6 +45,8 @@ void loop()
 			int cx=0, cy=0;
 			ss.getApriltagInfo(&px, &py, &pz, &rx, &ry, &rz, &cx, &cy);
 			int dist = sqrt(px*px + py*py + pz*pz) * tag_size;
+			Serial.print("id=");
+      		Serial.print(ss.getTypeID());
 			Serial.print("(x,y,z)=(");
 			Serial.print(px);
 			Serial.print(", ");

@@ -114,11 +114,6 @@ Pixetto::Pixetto(int rx, int tx)
 #endif
 }
 
-void Pixetto::enableUVC(bool uvc)
-{
-	SS_FUNC(m_flag, enableUVC, uvc)
-}
-
 void Pixetto::begin()
 {
 	SS_FUNC(m_flag, begin)
@@ -142,6 +137,12 @@ void Pixetto::setDetectMode(bool mode)
 void Pixetto::enableFunc(Pixetto::EFunc fid)
 {
 	SS_FUNC(m_flag, enableFunc, fid)
+}
+
+long Pixetto::getVersion()
+{
+	SS_FUNC(m_flag, getVersion)
+	return -1;
 }
 
 bool Pixetto::isDetected()
@@ -204,6 +205,12 @@ int Pixetto::getWidth()
 int Pixetto::numObjects()
 {
 	SS_FUNC(m_flag, numObjects)
+	return 0;
+}
+
+int Pixetto::getSequenceID()
+{
+	SS_FUNC(m_flag, getSequenceID)
 	return 0;
 }
 

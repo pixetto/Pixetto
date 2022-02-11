@@ -28,6 +28,8 @@ Pixetto ss(rxPin, txPin);
 void setup()
 {
 	ss.begin();
+    ss.setDetectMode(false);
+    ss.enableFunc(Pixetto::FUNC_COLOR_DETECTION);
 
 	pinMode(13, OUTPUT);
 	pinMode(11, OUTPUT);

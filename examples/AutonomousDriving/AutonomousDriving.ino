@@ -29,6 +29,8 @@ void setup()
 {
 	Serial.begin(9600);
 	ss.begin();
+	ss.setDetectMode(false);
+	ss.enableFunc(Pixetto::FUNC_AUTONOMOUS_DRIVING);
 }
 
 

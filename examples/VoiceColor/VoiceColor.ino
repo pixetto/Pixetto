@@ -25,22 +25,14 @@
 
 Pixetto ss(rxPin, txPin);
 
-bool bVoice = true;
-
 void setup()
 {
-  //Serial.begin(9600);
-  Serial.println("setup");
 	ss.begin();
+	ss.setDetectMode(true);
+	ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
 
-  ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
-  bVoice = true;
 	pinMode(11, OUTPUT);
-  pinMode(13, OUTPUT);
-
-  digitalWrite(13, HIGH);
-  digitalWrite(11, HIGH);
-
+	pinMode(13, OUTPUT);
 }
 
 
@@ -48,41 +40,21 @@ void loop()
 {
 	if (ss.isDetected()) {
 		// Available voice commands are defined in Pixetto.h.
-		if (bVoice == true && ss.getFuncID() == Pixetto::FUNC_VOICE_COMMAND) {
-      Serial.print("Voice Command  ");
-      Serial.println(ss.getTypeID());
-			if (ss.getTypeID() == Pixetto::VOICE_WhatColor) {
-        ss.enableFunc(Pixetto::FUNC_COLOR_DETECTION);
-        bVoice = false;
-        digitalWrite(13, LOW);
-        digitalWrite(11, LOW);
-      }
-      if (ss.getTypeID() == Pixetto::VOICE_WhatShape) {
-        ss.enableFunc(Pixetto::FUNC_SHAPE_DETECTION);
-        bVoice = false;
-        digitalWrite(13, LOW);
-        digitalWrite(11, LOW);
-      }
-    }
-
-    if (bVoice == false && ss.getFuncID() == Pixetto::FUNC_COLOR_DETECTION) {
-      Serial.print("Color Detection  ");
-      Serial.println(ss.getTypeID());
-      if (ss.getTypeID() == Pixetto::COLOR_RED) {
+		if (ss.getFuncID() == Pixetto::FUNC_VOICE_COMMAND) {
+			if (ss.getTypeID() == Pixetto::VOICE_TurnOnLight){
 				digitalWrite(13, HIGH);
-        digitalWrite(11, LOW);
-        delay(2000);
-      }
-      else if (ss.getTypeID() == Pixetto::COLOR_BLUE) {
-        digitalWrite(11, HIGH);
-        digitalWrite(13, LOW);
-        delay(2000);
-      }
-      ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
-      bVoice = true;
-      digitalWrite(13, HIGH);
-      digitalWrite(11, HIGH);
-    }
+			} else if (ss.getTypeID() == Pixetto::VOICE_TurnOffLight){
+				digitalWrite(13, LOW);
+			}
+		}
+
+		if (ss.getFuncID() == Pixetto::FUNC_COLOR_DETECTION) {
+			if (ss.getTypeID() == Pixetto::COLOR_RED){
+				digitalWrite(11, HIGH);
+			} else if (ss.getTypeID() == Pixetto::COLOR_BLUE){
+				digitalWrite(11, LOW);
+			}
+		}
 	}
 	//delay(20);
 }

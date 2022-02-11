@@ -30,8 +30,9 @@ int led = 13;
 void setup()
 {
 	ss.begin();
-  //ss.enableUVC(true);
-  
+	ss.setDetectMode(true);
+	ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
+
 	pinMode(led, OUTPUT);
 }
 

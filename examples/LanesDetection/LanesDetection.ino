@@ -28,7 +28,9 @@ Pixetto ss(rxPin, txPin);
 void setup()
 {
   Serial.begin(9600);
-	ss.begin();
+  ss.begin();
+  ss.setDetectMode(false);
+  ss.enableFunc(Pixetto::FUNC_LANES_DETECTION);
 }
 
 

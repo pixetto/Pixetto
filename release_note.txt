@@ -107,3 +107,12 @@ Changelog
 2021-11-25  Release v1.5.8
  * Remove reset uboot code, since stucking in uboot case will no longer happen.
  * Fix a bug that returning invalid data (when detect nothing) in AutonomousDriving. Only valid data should be returned.
+
+2022-01-26  Release v1.6.1
+ * Support both Pixetto and Harpcam.
+ * It does not support backward compatibility.
+ * Cloud detection, Simple classifier, Voice command, Autonomous driving functions are only available for Pixetto.
+   See enum EFunc.
+ * Pixetto support voice command to trigger some other detection function. See enum EVoiceCommand.
+ * Return multiple objects of one frame. Use getSequenceID to identify if objects are from the same frame.
+ * Remove stream mode, only support callback mode.
