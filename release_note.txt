@@ -115,4 +115,8 @@ Changelog
    See enum EFunc.
  * Pixetto support voice command to trigger some other detection function. See enum EVoiceCommand.
  * Return multiple objects of one frame. Use getSequenceID to identify if objects are from the same frame.
- * Remove stream mode, only support callback mode.
+
+2022-03-02  Release v1.6.2
+ * Rebase on Pixetto Lite library.
+ * Cleanup (dos2unix, trailing white spaces, indent...), and fix copyright and coding style.
+ * Fix comment encoding from BIG5 to UTF-8.

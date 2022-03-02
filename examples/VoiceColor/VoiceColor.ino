@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
+ * Copyright 2022 VIA Technologies, Inc. All Rights Reserved.
  *
  * This PROPRIETARY SOFTWARE is the property of WonderMedia Technologies, Inc.
  * and may contain trade secrets and/or other confidential information of
@@ -27,34 +27,33 @@ Pixetto ss(rxPin, txPin);
 
 void setup()
 {
-	ss.begin();
-	ss.setDetectMode(true);
-	ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
+  ss.begin();
+  ss.setDetectMode(true);
+  ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
 
-	pinMode(11, OUTPUT);
-	pinMode(13, OUTPUT);
+  pinMode(11, OUTPUT);
+  pinMode(13, OUTPUT);
 }
-
 
 void loop()
 {
-	if (ss.isDetected()) {
-		// Available voice commands are defined in Pixetto.h.
-		if (ss.getFuncID() == Pixetto::FUNC_VOICE_COMMAND) {
-			if (ss.getTypeID() == Pixetto::VOICE_TurnOnLight){
-				digitalWrite(13, HIGH);
-			} else if (ss.getTypeID() == Pixetto::VOICE_TurnOffLight){
-				digitalWrite(13, LOW);
-			}
-		}
+  if (ss.isDetected()) {
+    // Available voice commands are defined in Pixetto.h.
+    if (ss.getFuncID() == Pixetto::FUNC_VOICE_COMMAND) {
+      if (ss.getTypeID() == Pixetto::VOICE_TurnOnLight) {
+        digitalWrite(13, HIGH);
+      } else if (ss.getTypeID() == Pixetto::VOICE_TurnOffLight) {
+        digitalWrite(13, LOW);
+      }
+    }
 
-		if (ss.getFuncID() == Pixetto::FUNC_COLOR_DETECTION) {
-			if (ss.getTypeID() == Pixetto::COLOR_RED){
-				digitalWrite(11, HIGH);
-			} else if (ss.getTypeID() == Pixetto::COLOR_BLUE){
-				digitalWrite(11, LOW);
-			}
-		}
-	}
-	//delay(20);
+    if (ss.getFuncID() == Pixetto::FUNC_COLOR_DETECTION) {
+      if (ss.getTypeID() == Pixetto::COLOR_RED) {
+        digitalWrite(11, HIGH);
+      } else if (ss.getTypeID() == Pixetto::COLOR_BLUE) {
+        digitalWrite(11, LOW);
+      }
+    }
+  }
+  //delay(20);
 }

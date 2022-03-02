@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
+ * Copyright 2022 VIA Technologies, Inc. All Rights Reserved.
  *
  * This PROPRIETARY SOFTWARE is the property of VIA Technologies, Inc.
  * and may contain trade secrets and/or other confidential information of
@@ -11,240 +11,274 @@
  * AND VIA TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
  * ENJOYMENT OR NON-INFRINGEMENT.
-*/
+ */
 
-#include <Arduino.h>
-#include "InnerSensor.h"
-
-#if ESP32
-#define SS_FUNC(f, func, ...) \
-	if (f == true) \
-		return ss_hw->func(__VA_ARGS__);
-#else
-#define SS_FUNC(f, func, ...) \
-	if (f == true) \
-		return ss_hw->func(__VA_ARGS__); \
-	else \
-		return ss_sw->func(__VA_ARGS__);
-#endif
+#include <Pixetto.h>
 
 Pixetto::Pixetto(int rx, int tx)
-	: ss_hw(0), m_flag(false), m_rx(rx), m_tx(tx)
 {
-#if ESP32
-	// C:\Users\xxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.6\cores\esp32\HardwareSerial.cpp
-	if (rx == 3 && tx == 1)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
-		return;
-	}
-	if (rx == 9 && tx == 10)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
-		return;
-	}
-	if (rx == 16 && tx == 17)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial2);
-		return;
-	}
-	return;
-	
-#else
-	swSer = 0;
-	ss_sw = 0;
-
-	// https://www.arduino.cc/reference/en/language/functions/communication/serial/
-#if defined(HAVE_HWSERIAL0) && defined(HAVE_HWSERIAL1) && defined(HAVE_HWSERIAL2) && defined(HAVE_HWSERIAL3)
-	// Mega, Due
-	if (rx == 0 && tx == 1)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
-		return;
-	}
-	if (rx == 19 && tx == 18)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
-		return;
-	}
-	if (rx == 17 && tx == 16)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial2);
-		return;
-	}
-	if (rx == 15 && tx == 14)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial3);
-		return;
-	}
-#elif defined(HAVE_HWSERIAL1)
-	// Leonardo, Microm Yun, MKR, Zero, 101
-	if (rx == 0 && tx == 1)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
-		return;
-	}
-	if (rx == 13 && tx == 14)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial1);
-		return;
-	}
-#elif defined(HAVE_HWSERIAL0)
-	// Uno, Nano, Mini
-	if (rx == 0 && tx == 1)
-	{
-		m_flag = true;
-		ss_hw = new InnerSensor<HardwareSerial>(&Serial);
-		return;
-	}
-#endif
-
-	m_flag = false;
-	swSer = new SoftwareSerial(rx,tx);
-	ss_sw = new InnerSensor<SoftwareSerial>(swSer);
-#endif
+  m_rx = rx;
+  m_tx = tx;
 }
 
 void Pixetto::begin()
 {
-	SS_FUNC(m_flag, begin)
+  const long speed = 38400;
+  const int rx = m_rx;
+  const int tx = m_tx;
+
+  m_data = (struct pxt_data *) m_buf;
+
+#if ESP32
+  // C:\Users\xxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.6\cores\esp32\HardwareSerial.cpp
+  if (rx == 3 && tx == 1) {
+    Serial.begin(speed);
+    m_serial = &Serial;
+    return;
+  }
+  if (rx == 9 && tx == 10) {
+    Serial.begin(speed);
+    m_serial = &Serial1;
+    return;
+  }
+  if (rx == 16 && tx == 17) {
+    Serial.begin(speed);
+    m_serial = &Serial2;
+    return;
+  }
+  return;
+#else
+  // https://www.arduino.cc/reference/en/language/functions/communication/serial/
+#if defined(HAVE_HWSERIAL0) && defined(HAVE_HWSERIAL1) && defined(HAVE_HWSERIAL2) && defined(HAVE_HWSERIAL3)
+  // Mega, Due
+  if (rx == 0 && tx == 1) {
+    Serial.begin(speed);
+    m_serial = &Serial;
+    return;
+  }
+  if (rx == 19 && tx == 18) {
+    Serial.begin(speed);
+    m_serial = &Serial1;
+    return;
+  }
+  if (rx == 17 && tx == 16) {
+    Serial.begin(speed);
+    m_serial = &Serial2;
+    return;
+  }
+  if (rx == 15 && tx == 14) {
+    Serial.begin(speed);
+    m_serial = &Serial3;
+    return;
+  }
+#elif defined(HAVE_HWSERIAL1)
+  // Leonardo, Micro Yun, Zero, 101
+  if (rx == 0 && tx == 1) {
+    Serial.begin(speed);
+    m_serial = &Serial1;
+    return;
+  }
+#elif defined(HAVE_HWSERIAL0)
+  // Uno, Nano, Mini
+  if (rx == 0 && tx == 1) {
+    Serial.begin(speed);
+    m_serial = &Serial;
+    return;
+  }
+#endif
+#endif                          // ESP32
+  SoftwareSerial *s = new SoftwareSerial(rx, tx);
+  s->begin(speed);
+  m_serial = s;
 }
 
 void Pixetto::end()
 {
-	SS_FUNC(m_flag, end)
 }
 
 void Pixetto::flush()
 {
-	SS_FUNC(m_flag, flush)
 }
 
 void Pixetto::setDetectMode(bool mode)
 {
-	SS_FUNC(m_flag, setDetectMode, mode)
 }
 
 void Pixetto::enableFunc(Pixetto::EFunc fid)
 {
-	SS_FUNC(m_flag, enableFunc, fid)
+  pxtSetFunc(*m_serial, fid);
 }
 
 long Pixetto::getVersion()
 {
-	SS_FUNC(m_flag, getVersion)
-	return -1;
+  return pxtGetVersion(*m_serial);
 }
 
 bool Pixetto::isDetected()
 {
-	pinMode(m_rx, INPUT);
-  	pinMode(m_tx, OUTPUT);
-  
-	SS_FUNC(m_flag, isDetected)
-	return false;
+  static int n = 0;
+
+  if (n == 0) {
+    n = pxtAvailable(*m_serial);
+    m_avail = n;
+    m_seq = -1;
+    // Serial.print("pxtAvailable: ");
+    // Serial.println(n);
+  }
+
+  if (n > 0) {
+    if (pxtGetData(*m_serial, m_buf, PXT_BUF_SIZE) > 0) {
+      n--;
+      m_seq++;
+      // Serial.print("pxtGetData: ");
+      // Serial.println(n);
+      return true;
+    } else {
+      n = 0;
+      // Serial.println("error");
+    }
+  }
+  // Serial.println("no data");
+
+  return false;
 }
 
 int Pixetto::getFuncID()
 {
-	SS_FUNC(m_flag, getFuncID)
-	return 0;
+  return m_data->func_id;
 }
 
 int Pixetto::getTypeID()
 {
-	SS_FUNC(m_flag, getTypeID)
-	return 0;
+  return m_data->class_id;
 }
 
 int Pixetto::getPosX()
 {
-	SS_FUNC(m_flag, getPosX)
-	return 0;
+  return m_data->x;
 }
 
 int Pixetto::getPosY()
 {
-	SS_FUNC(m_flag, getPosY)
-	return 0;
+  return m_data->y;
 }
 
 int Pixetto::getH()
 {
-	SS_FUNC(m_flag, getH)
-	return 0;
+  return m_data->h;
 }
 
 int Pixetto::getW()
 {
-	SS_FUNC(m_flag, getW)
-	return 0;
+  return m_data->w;
 }
 
 int Pixetto::getHeight()
 {
-	SS_FUNC(m_flag, getH)
-	return 0;
+  return m_data->h;
 }
 
 int Pixetto::getWidth()
 {
-	SS_FUNC(m_flag, getW)
-	return 0;
+  return m_data->w;
 }
 
 int Pixetto::numObjects()
 {
-	SS_FUNC(m_flag, numObjects)
-	return 0;
+  return m_avail;
 }
 
 int Pixetto::getSequenceID()
 {
-	SS_FUNC(m_flag, getSequenceID)
-	return 0;
+  return m_seq;
 }
 
-void Pixetto::getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2)
+void Pixetto::getLanePoints(int *lx1, int *ly1, int *lx2, int *ly2,
+                            int *rx1, int *ry1, int *rx2, int *ry2)
 {
-	SS_FUNC(m_flag, getLanePoints, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2)
+  *lx1 = m_data->extra.traffic.left_x1;
+  *ly1 = m_data->extra.traffic.left_y1;
+  *lx2 = m_data->extra.traffic.left_x2;
+  *ly2 = m_data->extra.traffic.left_y2;
+
+  *rx1 = m_data->extra.traffic.right_x1;
+  *ry1 = m_data->extra.traffic.right_y1;
+  *rx2 = m_data->extra.traffic.right_x2;
+  *ry2 = m_data->extra.traffic.right_y2;
 }
 
 void Pixetto::getEquationExpr(char *buf, int len)
 {
-	SS_FUNC(m_flag, getEquationExpr, buf, len)
+  memcpy(buf, m_data->extra.math.equation, min(len, 16));
 }
 
 float Pixetto::getEquationAnswer()
 {
-	SS_FUNC(m_flag, getEquationAnswer)
-	return 0;
+  return m_data->extra.math.result;
 }
 
-
-void Pixetto::getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy)
+void Pixetto::getApriltagInfo(float *px, float *py, float *pz, float *rx,
+                              float *ry, float *rz, float *cx, float *cy)
 {
-	SS_FUNC(m_flag, getApriltagInfo, px, py, pz, rx, ry, rz, cx, cy)
-}
+  *px = m_data->extra.apltag.pos_x;
+  *py = m_data->extra.apltag.pos_y;
+  *pz = m_data->extra.apltag.pos_z;
 
+  *rx = m_data->extra.apltag.rot_x;
+  *ry = m_data->extra.apltag.rot_y;
+  *rz = m_data->extra.apltag.rot_z;
+
+  *cx = m_data->extra.apltag.center_x;
+  *cy = m_data->extra.apltag.center_y;
+}
 
 float Pixetto::getApriltagField(Pixetto::EApriltagField field)
 {
-	SS_FUNC(m_flag, getApriltagField, field)
-	return 0;
+  switch (field) {
+  case Pixetto::APRILTAG_POS_X:
+    return m_data->extra.apltag.pos_x;
+  case Pixetto::APRILTAG_POS_Y:
+    return m_data->extra.apltag.pos_y;
+  case Pixetto::APRILTAG_POS_Z:
+    return m_data->extra.apltag.pos_z;
+  case Pixetto::APRILTAG_ROT_X:
+    return m_data->extra.apltag.rot_x;
+  case Pixetto::APRILTAG_ROT_Y:
+    return m_data->extra.apltag.rot_x;
+  case Pixetto::APRILTAG_ROT_Z:
+    return m_data->extra.apltag.rot_x;
+  case Pixetto::APRILTAG_CENTER_X:
+    return m_data->extra.apltag.center_x;
+  case Pixetto::APRILTAG_CENTER_Y:
+    return m_data->extra.apltag.center_x;
+  default:
+    return 0;
+  }
+
+  return 0;
 }
 
 float Pixetto::getLanesField(Pixetto::ELanesField field)
 {
-	SS_FUNC(m_flag, getLanesField, field)
-	return 0;
+  switch (field) {
+  case Pixetto::LANES_LX1:
+    return m_data->extra.traffic.left_x1;
+  case Pixetto::LANES_LY1:
+    return m_data->extra.traffic.left_y1;
+  case Pixetto::LANES_LX2:
+    return m_data->extra.traffic.left_x2;
+  case Pixetto::LANES_LY2:
+    return m_data->extra.traffic.left_y2;
+  case Pixetto::LANES_RX1:
+    return m_data->extra.traffic.right_x1;
+  case Pixetto::LANES_RY1:
+    return m_data->extra.traffic.right_y1;
+  case Pixetto::LANES_RX2:
+    return m_data->extra.traffic.right_x2;
+  case Pixetto::LANES_RY2:
+    return m_data->extra.traffic.right_y2;
+  default:
+    return 0;
+  }
+  return 0;
 }

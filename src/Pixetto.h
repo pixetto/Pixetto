@@ -1,274 +1,252 @@
 /*
-* Copyright 2020 VIA Technologies, Inc. All Rights Reserved.
-*
-* This PROPRIETARY SOFTWARE is the property of VIA Technologies, Inc.
-* and may contain trade secrets and/or other confidential information of
-* VIA Technologies, Inc. This file shall not be disclosed to any third
-* party, in whole or in part, without prior written consent of VIA.
-*
-* THIS PROPRIETARY SOFTWARE AND ANY RELATED DOCUMENTATION ARE PROVIDED AS IS,
-* WITH ALL FAULTS, AND WITHOUT WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED,
-* AND VIA TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
-* WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
-* ENJOYMENT OR NON-INFRINGEMENT.
-*/
+ * Copyright 2022 VIA Technologies, Inc. All Rights Reserved.
+ *
+ * This PROPRIETARY SOFTWARE is the property of VIA Technologies, Inc.
+ * and may contain trade secrets and/or other confidential information of
+ * VIA Technologies, Inc. This file shall not be disclosed to any third
+ * party, in whole or in part, without prior written consent of VIA.
+ *
+ * THIS PROPRIETARY SOFTWARE AND ANY RELATED DOCUMENTATION ARE PROVIDED AS IS,
+ * WITH ALL FAULTS, AND WITHOUT WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED,
+ * AND VIA TECHNOLOGIES, INC. DISCLAIMS ALL EXPRESS OR IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+ * ENJOYMENT OR NON-INFRINGEMENT.
+ */
 #ifndef Pixetto_h
 #define Pixetto_h
 
 #include <Arduino.h>
-#if !defined(ESP32)
-#include <SoftwareSerial.h>
-#endif
+#include <PixettoLite.h>
 
-#define PIXETTO_VERSION 1.6.1
+#define PIXETTO_VERSION 1.6.2
 
-template <class SerType>
-class InnerSensor;
-
-class Pixetto
-{
+class Pixetto {
 public:
-	Pixetto(int rx, int tx);
-	
-	enum EFunc
-	{
-		FUNC_COLOR_DETECTION		= 1,
-		FUNC_COLOR_CODE_DETECTION	= 2,
-		FUNC_SHAPE_DETECTION		= 3,
-		FUNC_SPHERE_DETECTION		= 4,
-		FUNC_TEMPLATE_MATCHING		= 6,
-		FUNC_KEYPOINTS				= 8,
-		FUNC_NEURAL_NETWORK			= 9,
-		FUNC_APRILTAG				= 10,
-		FUNC_FACE_DETECTION			= 11,
-		FUNC_TRAFFIC_SIGN_DETECTION	= 12,
-		FUNC_HANDWRITTEN_DIGITS_DETECTION	= 13,
-		FUNC_HANDWRITTEN_LETTERS_DETECTION	= 14,
-		FUNC_CLOUD_DETECTION		= 15,  // not supported by harp-cam
-		FUNC_LANES_DETECTION		= 16,
-		FUNC_EQUATION_DETECTION		= 17,
-		FUNC_SIMPLE_CLASSIFIER		= 18,  // not supported by harp-cam
-		FUNC_VOICE_COMMAND			= 19,  // not supported by harp-cam
-		FUNC_AUTONOMOUS_DRIVING		= 20   // not supported by harp-cam
-	};
-	
-	enum EColor
-	{
-		COLOR_RED = 1,
-		COLOR_YELLOW,
-		COLOR_GREEN,
-		COLOR_BLUE,
-		COLOR_PURPLE,
-		COLOR_BLACK
-	};
-	
-	enum EShape
-	{
-		SHAPE_ROUND = 1,
-		SHAPE_RECTANGLE,
-		SHAPE_TRIANGLE,
-		SHAPE_PENTAGON
-	};
-	
-	enum ETrafficSign
-	{
-		SIGN_NO_ENTRE = 0,
-		SIGN_NO_LEFT_TURN,
-		SIGN_NO_RIGHT_TURN,
-		SIGN_WRONG_WAY,
-		SIGN_NO_U_TURN,
-		SIGN_MAX_SPEED,
-		SIGN_ONEWAY_TRAFFIC,
-		SIGN_LEFT_TURN,
-		SIGN_RIGHT_TURN,
-		SIGN_MIN_SPEED,
-		SIGN_U_TURN,
-		SIGN_TUNNEL_AHEAD,
-		SIGN_BEWARE_OF_CHILDREN,
-		SIGN_ROUNDABOUT,
-		SIGN_YIELD_TO_PEDESTRIAN,
-		SIGN_RED_LIGHT,
-		SIGN_GREEN_LIGHT
-	};
+  Pixetto(int rx, int tx);
 
-	enum ELetters
-	{
-		LETTER_A=0,
-		LETTER_B,
-		LETTER_C,
-		LETTER_D,
-		LETTER_E,
-		LETTER_F,
-		LETTER_G,
-		LETTER_H,
-		LETTER_I,
-		LETTER_J,
-		LETTER_K,
-		LETTER_L,
-		LETTER_M,
-		LETTER_N,
-		LETTER_O,
-		LETTER_P,
-		LETTER_Q,
-		LETTER_R,
-		LETTER_S,
-		LETTER_T,
-		LETTER_U,
-		LETTER_V,
-		LETTER_W,
-		LETTER_X,
-		LETTER_Y,
-		LETTER_Z
-	};
+  enum EFunc {
+    FUNC_COLOR_DETECTION = 1,
+    FUNC_COLOR_CODE_DETECTION = 2,
+    FUNC_SHAPE_DETECTION = 3,
+    FUNC_SPHERE_DETECTION = 4,
+    FUNC_TEMPLATE_MATCHING = 6,
+    FUNC_KEYPOINTS = 8,
+    FUNC_NEURAL_NETWORK = 9,
+    FUNC_APRILTAG = 10,
+    FUNC_FACE_DETECTION = 11,
+    FUNC_TRAFFIC_SIGN_DETECTION = 12,
+    FUNC_HANDWRITTEN_DIGITS_DETECTION = 13,
+    FUNC_HANDWRITTEN_LETTERS_DETECTION = 14,
+    FUNC_CLOUD_DETECTION = 15,          // Not available in HarpCam.
+    FUNC_LANES_DETECTION = 16,
+    FUNC_EQUATION_DETECTION = 17,
+    FUNC_SIMPLE_CLASSIFIER = 18,        // Not available in HarpCam.
+    FUNC_VOICE_COMMAND = 19,            // Not available in HarpCam.
+    FUNC_AUTONOMOUS_DRIVING = 20        // Not available in HarpCam.
+  };
 
-	enum EVoiceCommand
-	{
-		VOICE_Hello = 1,	// §A¦n
-		VOICE_Thanks,       // ÁÂÁÂ
-		VOICE_Bye,			// ¦A¨£
-		VOICE_WhatsThis,	// ³o¬O¬Æ»ò
-		VOICE_WhatTime,		// ²{¦b´XÂI
-		VOICE_HowOld,		// §Ú´X·³
-		VOICE_WhatDay,		// ¤µ¤Ñ¬P´Á´X
-		VOICE_TellStory,	// Á¿¬G¨Æ
-		VOICE_TellJoke,		// »¡¯º¸Ü
-		VOICE_ReadPoem,		// ©À­ð¸Ö
-		VOICE_TurnOnLight,	// ¶}¿O
-		VOICE_TurnOffLight,	// Ãö¿O
-		VOICE_TurnLeft,		// ¥ªÂà
-		VOICE_TurnRight,	// ¥kÂà
-		VOICE_GoAhead,		// «e¶i
-		VOICE_MoveBack,		// «á°h
-		VOICE_Stop,			// °±¤î
-		VOICE_Open,			// ¶}±Ò
-		VOICE_Close,		// Ãö³¬
-		VOICE_OpenEyes1,	// ¸C¶}²´·ú
-		VOICE_OpenEyes2,	// ¸C²´
-		VOICE_CloseEyes1,	// ³¬¤W²´·ú
-		VOICE_CloseEyes2,	// ³¬²´
-		VOICE_Jump,			// ¸õ¤@¤U
-		VOICE_StandUp,		// °_¥ß
-		VOICE_SquatDown,	// ÃÛ¤U	
-		VOICE_WhatColor,	// ³o¬O¬Æ»òÃC¦â
-		VOICE_WhatShape,	// ³o¬O¬Æ»ò§Îª¬
-		VOICE_ColorDetect,  // ÃC¦â°»´ú
-		VOICE_ColorCode,    // ÃC¦â²Õ¦X°»´ú
-		VOICE_ShapeDetect,  // §Îª¬°»´ú
-		VOICE_ShpereDetect, // ²yÅé°»´ú
-		VOICE_Template,     // ¼ÒªO¤Ç°t
-		VOICE_Keypoints,    // ¯S¼xÂI°»´ú
-		VOICE_NeuralNetwork,// ¯«¸gºô¸ô¿ëÃÑ
-		VOICE_TrafficSign,  // ¥æ³q¼Ð»x¿ëÃÑ
-		VOICE_HandDigits,   // ¤â¼g¼Æ¦r¿ëÃÑ
-		VOICE_HandLetters,  // ¤â¼g¦r¥À¿ëÃÑ
-		VOICE_DigitsOp,     // ¼Æ¦r¹Bºâ
-		VOICE_Lanes,        // ¨®¹D°»´ú
-		VOICE_Face,         // ¤HÁy°»´ú
-		VOICE_RemoteComputing,// »·ºÝ¹Bºâ
-		VOICE_SimpleClassifier,// Â²©ö¤ÀÃþ¾¹
-		VOICE_AutoDrive,    // ¦Û°Ê¾r¾p
-		VOICE_StopDetect  // °±¤î°»´ú¥\¯à
-	};
+  enum EColor {
+    COLOR_RED = 1,
+    COLOR_YELLOW,
+    COLOR_GREEN,
+    COLOR_BLUE,
+    COLOR_PURPLE,
+    COLOR_BLACK
+  };
+
+  enum EShape {
+    SHAPE_ROUND = 1,
+    SHAPE_RECTANGLE,
+    SHAPE_TRIANGLE,
+    SHAPE_PENTAGON
+  };
+
+  enum ETrafficSign {
+    SIGN_NO_ENTRE = 0,
+    SIGN_NO_LEFT_TURN,
+    SIGN_NO_RIGHT_TURN,
+    SIGN_WRONG_WAY,
+    SIGN_NO_U_TURN,
+    SIGN_MAX_SPEED,
+    SIGN_ONEWAY_TRAFFIC,
+    SIGN_LEFT_TURN,
+    SIGN_RIGHT_TURN,
+    SIGN_MIN_SPEED,
+    SIGN_U_TURN,
+    SIGN_TUNNEL_AHEAD,
+    SIGN_BEWARE_OF_CHILDREN,
+    SIGN_ROUNDABOUT,
+    SIGN_YIELD_TO_PEDESTRIAN,
+    SIGN_RED_LIGHT,
+    SIGN_GREEN_LIGHT
+  };
+
+  enum ELetters {
+    LETTER_A = 0,
+    LETTER_B,
+    LETTER_C,
+    LETTER_D,
+    LETTER_E,
+    LETTER_F,
+    LETTER_G,
+    LETTER_H,
+    LETTER_I,
+    LETTER_J,
+    LETTER_K,
+    LETTER_L,
+    LETTER_M,
+    LETTER_N,
+    LETTER_O,
+    LETTER_P,
+    LETTER_Q,
+    LETTER_R,
+    LETTER_S,
+    LETTER_T,
+    LETTER_U,
+    LETTER_V,
+    LETTER_W,
+    LETTER_X,
+    LETTER_Y,
+    LETTER_Z
+  };
+
+  enum EVoiceCommand {
+    VOICE_Hello = 1,            // ä½ å¥½
+    VOICE_Thanks,               // è¬è¬
+    VOICE_Bye,                  // å†è¦‹
+    VOICE_WhatsThis,            // é€™æ˜¯ç”šéº¼
+    VOICE_WhatTime,             // ç¾åœ¨å¹¾é»ž
+    VOICE_HowOld,               // æˆ‘å¹¾æ­²
+    VOICE_WhatDay,              // ä»Šå¤©æ˜ŸæœŸå¹¾
+    VOICE_TellStory,            // è¬›æ•…äº‹
+    VOICE_TellJoke,             // èªªç¬‘è©±
+    VOICE_ReadPoem,             // å¿µå”è©©
+    VOICE_TurnOnLight,          // é–‹ç‡ˆ
+    VOICE_TurnOffLight,         // é—œç‡ˆ
+    VOICE_TurnLeft,             // å·¦è½‰
+    VOICE_TurnRight,            // å³è½‰
+    VOICE_GoAhead,              // å‰é€²
+    VOICE_MoveBack,             // å¾Œé€€
+    VOICE_Stop,                 // åœæ­¢
+    VOICE_Open,                 // é–‹å•Ÿ
+    VOICE_Close,                // é—œé–‰
+    VOICE_OpenEyes1,            // çœé–‹çœ¼ç›
+    VOICE_OpenEyes2,            // çœçœ¼
+    VOICE_CloseEyes1,           // é–‰ä¸Šçœ¼ç›
+    VOICE_CloseEyes2,           // é–‰çœ¼
+    VOICE_Jump,                 // è·³ä¸€ä¸‹
+    VOICE_StandUp,              // èµ·ç«‹
+    VOICE_SquatDown,            // è¹²ä¸‹
+    VOICE_WhatColor,            // é€™æ˜¯ç”šéº¼é¡è‰²
+    VOICE_WhatShape,            // é€™æ˜¯ç”šéº¼å½¢ç‹€
+    VOICE_ColorDetect,          // é¡è‰²åµæ¸¬
+    VOICE_ColorCode,            // é¡è‰²çµ„åˆåµæ¸¬
+    VOICE_ShapeDetect,          // å½¢ç‹€åµæ¸¬
+    VOICE_ShpereDetect,         // çƒé«”åµæ¸¬
+    VOICE_Template,             // æ¨¡æ¿åŒ¹é…
+    VOICE_Keypoints,            // ç‰¹å¾µé»žåµæ¸¬
+    VOICE_NeuralNetwork,        // ç¥žç¶“ç¶²è·¯è¾¨è­˜
+    VOICE_TrafficSign,          // äº¤é€šæ¨™èªŒè¾¨è­˜
+    VOICE_HandDigits,           // æ‰‹å¯«æ•¸å­—è¾¨è­˜
+    VOICE_HandLetters,          // æ‰‹å¯«å­—æ¯è¾¨è­˜
+    VOICE_DigitsOp,             // æ•¸å­—é‹ç®—
+    VOICE_Lanes,                // è»Šé“åµæ¸¬
+    VOICE_Face,                 // äººè‡‰åµæ¸¬
+    VOICE_RemoteComputing,      // é ç«¯é‹ç®—
+    VOICE_SimpleClassifier,     // ç°¡æ˜“åˆ†é¡žå™¨
+    VOICE_AutoDrive,            // è‡ªå‹•é§•é§›
+    VOICE_StopDetect            // åœæ­¢åµæ¸¬åŠŸèƒ½
+  };
 
 
-	enum EApriltagField 
-	{
-		APRILTAG_POS_X=1,
-		APRILTAG_POS_Y,
-		APRILTAG_POS_Z,
-		APRILTAG_ROT_X,
-		APRILTAG_ROT_Y,
-		APRILTAG_ROT_Z,
-		APRILTAG_CENTER_X,
-		APRILTAG_CENTER_Y
-	};
+  enum EApriltagField {
+    APRILTAG_POS_X = 1,
+    APRILTAG_POS_Y,
+    APRILTAG_POS_Z,
+    APRILTAG_ROT_X,
+    APRILTAG_ROT_Y,
+    APRILTAG_ROT_Z,
+    APRILTAG_CENTER_X,
+    APRILTAG_CENTER_Y
+  };
 
-	enum ELanesField 
-	{
-	    LANES_LX1=1,
-	    LANES_LY1,
-	    LANES_LX2,
-	    LANES_LY2,
-	    LANES_RX1,
-	    LANES_RY1,
-	    LANES_RX2,
-	    LANES_RY2
-	};
+  enum ELanesField {
+    LANES_LX1 = 1,
+    LANES_LY1,
+    LANES_LX2,
+    LANES_LY2,
+    LANES_RX1,
+    LANES_RY1,
+    LANES_RX2,
+    LANES_RY2
+  };
 
-	void begin();		// Initialize the Pixetto
-	void end();         // Uninitialize the Pixetto
-	void flush();		// Clear the serial buffer.
-	void enableFunc(Pixetto::EFunc fid); // Switch among functions.
+  void begin();                 // Initialize the Pixetto
+  void end();                   // Uninitialize the Pixetto
+  void flush();                 // Clear the serial buffer.
+  void enableFunc(Pixetto::EFunc fid);   // Switch among functions.
 
-	void setDetectMode(bool mode=false); // Set detect mode (true:stream mode, false:callback mode)
-	                                     // Attention: the limit of callback mode:
-	                                     //   - Neural Network function does not work when object detection algorithm 
-										 //     is set to "Central", Blob Detection" and "Blob Detection (Kalman Filter)".
-										 //   - Voice Command function does not work on callback mode.
-										     
-	long getVersion();   // Get piextto firmware version
-						// return -1: camera is not ready
-						// return version: camera is ready.
+  void setDetectMode(bool mode = false); // obsoleted
 
-	bool isDetected();  // Is there any object detected?
-	int getFuncID();    // ID of the detected object
-	int getTypeID();    // Type ID (color or shape or...) of the detected object
-						// Attention:
-						//	- For Lane and traffic sign detection, TypeID is valid only when getTypeID() >= 0	
-			
-	int getPosX();      // x-coordinate of the upper-left corner of the detected object (range:0~100)
-						// In FUNC_LANES_DETECTION case, it's x-coordinate of the center point
-	int getPosY();      // y-coordinate of the upper-left corner of the detected object (range:0~100)
-						// In FUNC_LANES_DETECTION case, it's y-coordinate of the center point
-						
-	int getH();         // the height of the detected object (range:0~100)
-	int getW();         // the width of the detected object  (range:0~100)
-	int getHeight();    // the height of the detected object (range:0~100)
-	int getWidth();     // the width of the detected object  (range:0~100)
-	int	numObjects();	// the number of detected objects
-	int getSequenceID();// the detected objects from the same frame return the same sequence ID.
+  long getVersion();            // Get piextto firmware version
 
-	
-	
-	// For Lanes detection, 
-	//   get center point : getPosX(), getPosY()
-	//   get 4 end points of left and right lines : getLanePoints()
-	//   lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
-	//   rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
-	
-	// For lane and traffic sign etection,
-	// the 10 fields (PosX, PosY, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2) are valid only when getPosX() >= 0
-	void getLanePoints(int* lx1, int* ly1, int* lx2, int* ly2, int* rx1, int* ry1, int* rx2, int* ry2);
-						
-	// For Lanes detection, another function to get the 4 end points.
-	//   Get the value by given its corresponding field-id
-	//   ex. rx1 = getLanesField(Pixetto::LANES_LX1);
-	float getLanesField(Pixetto::ELanesField field);
-	
-	// For Apriltag detection
-	//   px,py,pz : distance to center on each x,y,z axis 
-	//   rx,ry,rz : rotation angle on each x,y,z axis
-	//   cx,cy    : coordinate of apriltag's center point
-	void getApriltagInfo(float* px, float* py, float* pz, int* rx, int* ry, int* rz, int* cx, int* cy);
-						
-	// For Apriltag detection, another function to get the 8 values of apriltag.
-	//   Get the value by given its corresponding field-id
-	//   ex. px = getApriltagField(Pixetto::APRILTAG_POS_X);
-	float getApriltagField(Pixetto::EApriltagField field);
-	
-	// For Equation detection, it always returns the first one detected equation.
-	void getEquationExpr(char *buf, int len);	// the detected equation expression, ex."2+3"
-	float getEquationAnswer();					// the answer of the equation
-	
+  bool isDetected();            // Is there any object detected?
+  int getFuncID();              // ID of the detected object
+  int getTypeID();              // Type ID (color or shape or...) of the detected object
+  // Attention:
+  //      - For Lane and traffic sign detection, TypeID is valid only when getTypeID() >= 0
+
+  int getPosX();                // x-coordinate of the upper-left corner of the detected object (range:0~100)
+  // In FUNC_LANES_DETECTION case, it's x-coordinate of the center point
+  int getPosY();                // y-coordinate of the upper-left corner of the detected object (range:0~100)
+  // In FUNC_LANES_DETECTION case, it's y-coordinate of the center point
+
+  int getH();                   // the height of the detected object (range:0~100)
+  int getW();                   // the width of the detected object  (range:0~100)
+  int getHeight();              // the height of the detected object (range:0~100)
+  int getWidth();               // the width of the detected object  (range:0~100)
+  int numObjects();             // the number of detected objects
+  int getSequenceID();          // the detected objects from the same frame return the same sequence ID.
+
+  // For Lanes detection,
+  //   get center point : getPosX(), getPosY()
+  //   get 4 end points of left and right lines : getLanePoints()
+  //   lx1, ly1, lx2, ly2 : coordinates of the two end points of the left line
+  //   rx1, ry1, rx2, ry2 : coordinates of the two end points of the right line
+
+  // For lane and traffic sign etection,
+  // the 10 fields (PosX, PosY, lx1, ly1, lx2, ly2, rx1, ry1, rx2, ry2) are valid only when getPosX() >= 0
+  void getLanePoints(int *lx1, int *ly1, int *lx2, int *ly2, int *rx1,
+                     int *ry1, int *rx2, int *ry2);
+
+  // For Lanes detection, another function to get the 4 end points.
+  //   Get the value by given its corresponding field-id
+  //   ex. rx1 = getLanesField(Pixetto::LANES_LX1);
+  float getLanesField(Pixetto::ELanesField field);
+
+  // For Apriltag detection
+  //   px,py,pz : distance to center on each x,y,z axis
+  //   rx,ry,rz : rotation angle on each x,y,z axis
+  //   cx,cy    : coordinate of apriltag's center point
+  void getApriltagInfo(float *px, float *py, float *pz, float *rx,
+                       float *ry, float *rz, float *cx, float *cy);
+
+  // For Apriltag detection, another function to get the 8 values of apriltag.
+  //   Get the value by given its corresponding field-id
+  //   ex. px = getApriltagField(Pixetto::APRILTAG_POS_X);
+  float getApriltagField(Pixetto::EApriltagField field);
+
+  // For Equation detection, it always returns the first one detected equation.
+  void getEquationExpr(char *buf, int len);     // the detected equation expression, ex."2+3"
+  float getEquationAnswer();    // the answer of the equation
+
 private:
-#if !defined(ESP32)
-	SoftwareSerial *swSer;
-	InnerSensor<SoftwareSerial> *ss_sw;
-#endif
-	InnerSensor<HardwareSerial> *ss_hw;
-	bool m_flag;
-	int m_rx;
-	int m_tx;
+  Stream * m_serial;
+  struct pxt_data *m_data;
+  char m_buf[PXT_BUF_SIZE];
+  int m_avail;
+  int m_seq;
+  int m_rx, m_tx;
 };
 
 #endif
