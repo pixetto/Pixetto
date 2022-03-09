@@ -243,7 +243,7 @@ public:
 private:
   Stream * m_serial;
   struct pxt_data *m_data;
-  char m_buf[PXT_BUF_SIZE];
+  byte m_buf[PXT_BUF_SIZE];
   int m_avail;
   int m_seq;
   int m_rx, m_tx;

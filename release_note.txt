@@ -120,3 +120,6 @@ Changelog
  * Rebase on Pixetto Lite library.
  * Cleanup (dos2unix, trailing white spaces, indent...), and fix copyright and coding style.
  * Fix comment encoding from BIG5 to UTF-8.
+
+2022-03-09  Release v1.6.3
+ * Fix compile issues for ESP32.

@@ -13,6 +13,10 @@
  * ENJOYMENT OR NON-INFRINGEMENT.
  */
 
+#if !ESP32
+#include <SoftwareSerial.h>
+#endif
+
 #include <Pixetto.h>
 
 Pixetto::Pixetto(int rx, int tx)
@@ -30,24 +34,24 @@ void Pixetto::begin()
   m_data = (struct pxt_data *) m_buf;
 
 #if ESP32
-  // C:\Users\xxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.6\cores\esp32\HardwareSerial.cpp
-  if (rx == 3 && tx == 1) {
+  // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/HardwareSerial.cpp
+  if ((rx == 3 && tx == 1) || (rx == 44 && tx == 43) || (rx == 20 && tx == 21)) {
     Serial.begin(speed);
     m_serial = &Serial;
     return;
   }
-  if (rx == 9 && tx == 10) {
+  if ((rx == 9 && tx == 10) || (rx == 18 && tx == 17) || (rx == 18 && tx == 19) || (rx == 15 && tx == 16)) {
     Serial.begin(speed);
     m_serial = &Serial1;
     return;
   }
-  if (rx == 16 && tx == 17) {
+  if ((rx == 16 && tx == 17) || (rx == 19 && tx == 20)) {
     Serial.begin(speed);
     m_serial = &Serial2;
     return;
   }
-  return;
-#else
+  return; // invalid pins
+#else // Arduino
   // https://www.arduino.cc/reference/en/language/functions/communication/serial/
 #if defined(HAVE_HWSERIAL0) && defined(HAVE_HWSERIAL1) && defined(HAVE_HWSERIAL2) && defined(HAVE_HWSERIAL3)
   // Mega, Due
@@ -86,10 +90,10 @@ void Pixetto::begin()
     return;
   }
 #endif
-#endif                          // ESP32
   SoftwareSerial *s = new SoftwareSerial(rx, tx);
   s->begin(speed);
   m_serial = s;
+#endif                          // ESP32
 }
 
 void Pixetto::end()
