@@ -104,10 +104,6 @@ void Pixetto::flush()
 {
 }
 
-void Pixetto::setDetectMode(bool mode)
-{
-}
-
 void Pixetto::enableFunc(Pixetto::EFunc fid)
 {
   pxtSetFunc(*m_serial, fid);

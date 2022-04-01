@@ -186,8 +186,6 @@ public:
   void flush();                 // Clear the serial buffer.
   void enableFunc(Pixetto::EFunc fid);   // Switch among functions.
 
-  void setDetectMode(bool mode = false); // obsoleted
-
   long getVersion();            // Get piextto firmware version
 
   bool isDetected();            // Is there any object detected?

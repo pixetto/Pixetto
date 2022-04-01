@@ -62,7 +62,7 @@ void loop()
       Serial.print(", ");
       Serial.print(rz);
       Serial.println(")degree");
-      
+
       Serial.print("cx=");
       Serial.print(cx);
       Serial.print(" cy=");

@@ -8,41 +8,41 @@ Changelog
  * Integrate SmartSensor classes for SoftwareSerial and HardwareSerial into one class.
  * Provide two examples ColorDetectionWithLED, ObjectTrackingWithPanTilt
  * Add library.properties, keywords.txt, README file.
- 
+
 2020-02-11	Release v1.0.4
  * Replace JSON format with HEX format for data packets.
  * Add checksum.
  * Change the range of X,Y,Width,Height values from 0~1000 to 0~100.
- * Note that it's not backward compatible, and requires Pixetto firmware with at least v1.0.0. 
+ * Note that it's not backward compatible, and requires Pixetto firmware with at least v1.0.0.
 
 2020-04-30  Release v1.0.5
- * Add EnableUVC() function to support UVC mode. 
+ * Add EnableUVC() function to support UVC mode.
    For the case of using Pixetto's USB and grove port simultaneously, it should switch to UVC mode.
- * Add numObjects() function to return number of detected objects. 
+ * Add numObjects() function to return number of detected objects.
 
  * Fix a bug that SmartSensor doesn't work any more after uploading arduino program.
    The root cause is that if SmartSensor is detecting objects while uploading arduino program,
-   there are too many detected data transfered through serial which may break STREAMON hand-shaking.  
+   there are too many detected data transfered through serial which may break STREAMON hand-shaking.
    Solution: Send STREAMOFF to close SmartSensor's camera, to stop sensor from sending any data.
    and then clear the serial buffer before sending STREAMON to open camera.
-   
+
 2020-05-11  Release v1.0.6
  * Provide a simple example for PanTilt (SimplePanTilt).
  * Simplify the codes of the example ObjectTrackingWithPanTilt.
- 
+
 2020-06-09	Release v1.0.7
  * Support LaneDetection HEX format - return 5 points
      getPosX : X-coordinate of the center point
      getPosY : Y-coordinate of the center point
      getLanePoints : first 2 points for left line, and last 2 points for right line.
-     
+
 2020-07-01	Release v1.0.8
  * Support Equation Detection, add two functions: getEquationExpr and getEquationAnswer
  * Support all arduino boards' HardwareSerial.
- 
+
 2020-07-08	Release v1.0.9
  * Remove internal debug message.
- 
+
 2020-07-28	Release v1.0.10
  * Modify arduino protocal format for Equation Detection.
    Use "xxxxx.xx" string format to represent the answer, instead of hex format,
@@ -52,7 +52,7 @@ Changelog
  * Support Apriltag detection - Add getApriltagInfo function.
  * Modify the implementation of receiving data from serial. Use readBytes instead of read.
  * Add two examples: ApriltagDetection and LaneFollower
- 
+
 2020-09-24	Release v1.0.12
  * Modify examples to use HardwareSerial as the default pins for pixetto.
 
@@ -66,7 +66,7 @@ Changelog
  * Rename the file names to Pixetto.h/Pixetto.cpp.
 
 2021-01-11	Release v1.4.1
- * Fix the bug that Pixetto can not be launched successfully when connecting to Arudino UNO board (VID:2341 by arduino.cc).  
+ * Fix the bug that Pixetto can not be launched successfully when connecting to Arudino UNO board (VID:2341 by arduino.cc).
  * Modification for mblock5 porting.
     1. Remove redundant function IDs.
     2. Remove Pixetto class destructor.
@@ -75,14 +75,14 @@ Changelog
 2021-01-20	Release v1.4.2
  * Resolve the problem that Pixetto can not be launched when connecting to Matrix Mini D1~D4 ports.
  * For the case that Pixetto can not be launched when connecting to Arduino UNO board,
-   reset Pixetto only when opencam is timeout, instead of resetting every startup. 
-   
+   reset Pixetto only when opencam is timeout, instead of resetting every startup.
+
 2021-02-26	Release v1.5.0
  * Add enableFunc() to switch among functions.
 
 2021-03-02	Release v1.5.1
  * Add setDetectMode() to switch between callback/event mode.
- 
+
 2021-08-27	Release v1.5.2
  * Fix compiler warnings for narrowing conversion from int to uint8_t.
 
@@ -90,9 +90,9 @@ Changelog
  * Add Autonomous Driving function.
  * Add AutonomousDriving and VoiceColor examples.
  * Add ESP32 board support (HardwareSerial only).
- 
+
 2021-10-15	Release v1.5.4
- * Fix camera cannot be reopen from arduino after it reboots abnormally. 
+ * Fix camera cannot be reopen from arduino after it reboots abnormally.
    Workaround: Reopen camera if there is no receiving data in 6 seconds.
 
 2021-11-01	Release v1.5.6
@@ -123,3 +123,7 @@ Changelog
 
 2022-03-09  Release v1.6.3
  * Fix compile issues for ESP32.
+
+2022-03-31  Release v1.6.4
+ * Remove unused setDetectMode() for compiler warnings.
+ * Remove trailing whitespaces.

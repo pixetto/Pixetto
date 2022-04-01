@@ -36,10 +36,10 @@ void loop()
 {
   int x1,y1,x2,y2,x3,y3,x4,y4,cx,cy;
   int typeID;
-  
+
   if (ss.isDetected()) {
     if (ss.getFuncID() == Pixetto::FUNC_AUTONOMOUS_DRIVING) {
-  
+
       // Lane points are valid only when (ss.getPosX() >= 0)
       cx = ss.getPosX();
       if (cx >= 0) {
@@ -50,7 +50,7 @@ void loop()
         String b = "(" + String(x1) + "," + String(y1) + ")("+ String(x2) + "," + String(y2) + ")("+ String(x3) + "," + String(y3) + ")("+ String(x4) + "," + String(y4) + ")";
         Serial.println(b);
       }
-  
+
       // Type ID (traffic sign ID) is valid only when (ss.getTypeID() >= 0)
       typeID = ss.getTypeID();
       if (typeID >= 0) {

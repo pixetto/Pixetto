@@ -38,7 +38,7 @@ void setup(){
 
   x = 0;
   err = 0;
-  prev_err = 0;  
+  prev_err = 0;
   cmd = 0;
 
   steering_servo.write(90);

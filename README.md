@@ -8,4 +8,3 @@ For more information about Pixetto, please visit at:
 [VIA Pixetto](https://pixetto.ai/)
 
 [Pixetto developer's guide (Chinese version)](https://learn.pixetto.ai/)
- 

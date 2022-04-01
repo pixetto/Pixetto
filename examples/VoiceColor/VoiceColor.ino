@@ -28,7 +28,6 @@ Pixetto ss(rxPin, txPin);
 void setup()
 {
   ss.begin();
-  ss.setDetectMode(true);
   ss.enableFunc(Pixetto::FUNC_VOICE_COMMAND);
 
   pinMode(11, OUTPUT);
