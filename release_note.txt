@@ -127,3 +127,6 @@ Changelog
 2022-03-31  Release v1.6.4
  * Remove unused setDetectMode() for compiler warnings.
  * Remove trailing whitespaces.
+
+2022-05-04  Release v1.6.5
+ * Fix issues for Arduino Maga and Due.

@@ -61,17 +61,17 @@ void Pixetto::begin()
     return;
   }
   if (rx == 19 && tx == 18) {
-    Serial.begin(speed);
+    Serial1.begin(speed);
     m_serial = &Serial1;
     return;
   }
   if (rx == 17 && tx == 16) {
-    Serial.begin(speed);
+    Serial2.begin(speed);
     m_serial = &Serial2;
     return;
   }
   if (rx == 15 && tx == 14) {
-    Serial.begin(speed);
+    Serial3.begin(speed);
     m_serial = &Serial3;
     return;
   }
