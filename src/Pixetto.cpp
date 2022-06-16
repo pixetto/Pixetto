@@ -41,12 +41,12 @@ void Pixetto::begin()
     return;
   }
   if ((rx == 9 && tx == 10) || (rx == 18 && tx == 17) || (rx == 18 && tx == 19) || (rx == 15 && tx == 16)) {
-    Serial.begin(speed);
+    Serial1.begin(speed);
     m_serial = &Serial1;
     return;
   }
   if ((rx == 16 && tx == 17) || (rx == 19 && tx == 20)) {
-    Serial.begin(speed);
+    Serial2.begin(speed);
     m_serial = &Serial2;
     return;
   }

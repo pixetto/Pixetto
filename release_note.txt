@@ -130,3 +130,6 @@ Changelog
 
 2022-05-04  Release v1.6.5
  * Fix issues for Arduino Maga and Due.
+
+2022-06-16  Release v1.6.6
+ * Fix Serial on ESP32.
